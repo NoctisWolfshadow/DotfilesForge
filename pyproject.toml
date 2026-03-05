@@ -7,7 +7,9 @@ authors = [
     { name = "NoctisWolfshadow", email = "basilgarrad@yahoo.de" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "tomli>=1.1.0 ; python_full_version < '3.11'",
+]
 
 [project.scripts]
 dotfilesforge = "dotfilesforge:main"
