@@ -1,0 +1,13 @@
+[install]
+ghostty=true
+neovim=true
+yazi=true
+fzf=true
+symlink_dotfiles=true
+
+[wsl_install]
+ghostty=false
+neovim=true
+yazi=false
+fzf=true
+symlink_dotfiles=true

@@ -1,7 +1,7 @@
 import sys
+from importlib.resources import files
 from pathlib import Path
-
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -20,6 +20,6 @@ def load_toml_config() -> dict[str, TomlValue]:
         with open(path, "rb") as file:
             toml = tomllib.load(file)
     else:
-        print("No Config File found for DotfilesForge")
-        exit()
+        with files("dotfilesforge").joinpath("dotfilesforge.toml").open("rb") as file:
+            toml = tomllib.load(file)
     return toml
