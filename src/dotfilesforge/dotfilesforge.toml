@@ -1,13 +1,11 @@
-[install]
-ghostty=true
-neovim=true
-yazi=true
-fzf=true
-symlink_dotfiles=true
+[paths]
+git_repos = "~/git"
 
-[wsl_install]
-ghostty=false
-neovim=true
-yazi=false
-fzf=true
-symlink_dotfiles=true
+[tools.ghostty]
+enabled=true
+version="tip"
+
+[tools.neovim]
+enabled=true
+version="v0.11.6"
+install_method="package"
