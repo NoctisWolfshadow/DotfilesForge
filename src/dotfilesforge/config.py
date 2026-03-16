@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from dataclasses import dataclass, field
 from importlib.resources import files
@@ -9,10 +11,13 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-
 TomlValue: TypeAlias = (
     str | int | float | bool | list["TomlValue"] | dict[str, "TomlValue"]
 )
+
+VALID_INSTALL_METHODS: frozenset[str] = frozenset({"default", "package", "git"})
+
+_config: Config | None = None
 
 
 @dataclass
@@ -36,6 +41,31 @@ class ToolConfig:
     version: str | None = None
     install_method: str = "default"
 
+    @classmethod
+    def from_raw(cls, data: dict[str, str | bool | None]) -> ToolConfig:
+        enabled = data.get("enabled")
+        if not isinstance(enabled, bool):
+            raise ValueError(
+                f"Invalid config: 'enabled' must be a bool, got {type(enabled).__name__!r} ({enabled!r})"
+            )
+
+        version = data.get("version")
+        if version is not None and not isinstance(version, str):
+            raise ValueError(
+                f"Invalid config: 'version' must be a string or null, got {type(version).__name__!r}"
+            )
+
+        install_method = data.get("install_method", "default")
+        if (
+            not isinstance(install_method, str)
+            or install_method not in VALID_INSTALL_METHODS
+        ):
+            raise ValueError(
+                f"Invalid config: 'install_method' must be one of {VALID_INSTALL_METHODS}, got {install_method!r}"
+            )
+
+        return cls(enabled=enabled, version=version, install_method=install_method)
+
 
 @dataclass
 class Config:
@@ -45,16 +75,8 @@ class Config:
         )
         tools_raw = cast(dict[str, dict[str, str | bool | None]], toml.get("tools", {}))
         self.tools: dict[str, ToolConfig] = {
-            name: ToolConfig(
-                enabled=cast(bool, data.get("enabled")),
-                version=cast(str | None, data.get("version")),
-                install_method=cast(str, data.get("install_method", "default")),
-            )
-            for name, data in tools_raw.items()
+            name: ToolConfig.from_raw(data) for name, data in tools_raw.items()
         }
-
-
-_config: Config | None = None
 
 
 def get_config() -> Config:
