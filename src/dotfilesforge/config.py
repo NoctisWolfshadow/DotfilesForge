@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass, field
 from importlib.resources import files
 from pathlib import Path
 from typing import TypeAlias, cast
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomllib
 
 TomlValue: TypeAlias = (
     str | int | float | bool | list["TomlValue"] | dict[str, "TomlValue"]
