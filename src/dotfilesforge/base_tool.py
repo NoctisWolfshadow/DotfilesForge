@@ -1,17 +1,25 @@
+import sys
 from abc import ABC, abstractmethod
+from pathlib import Path
 
+from git import Repo
 from packaging.version import Version
 
+from src.dotfilesforge.config import Config, get_config
 
-class BaseTool(ABC):
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override
+
+
+class ToolInstaller(ABC):
+    def __init__(self, config: Config | None = None):
+        self.config: Config = config or get_config()
+
+    @property
     @abstractmethod
-    def get_tool_name(self) -> str: ...
-
-
-class ToolInstaller(BaseTool, ABC):
-    def __init__(self, config: dict[str, str] | None = None):
-        self.config: dict[str, str] = config or {}
-        self.name: str = self.get_tool_name()
+    def tool_name(self) -> str: ...
 
     @abstractmethod
     def get_current_version(self) -> str | None: ...
@@ -31,12 +39,50 @@ class ToolInstaller(BaseTool, ABC):
         latest = self.get_latest_version()
 
         if not current:
-            print(f"Installing {self.name}...")
+            print(f"Installing {self.tool_name}...")
             self.install(latest)
             return
 
         if Version(current) < Version(latest):
-            print(f"Updating {self.name} from {current} to {latest}...")
+            print(f"Updating {self.tool_name} from {current} to {latest}...")
             self.update(latest)
         else:
-            print(f"{self.name} is up to date ({current})")
+            print(f"{self.tool_name} is up to date ({current})")
+
+
+class GitBasedTool(ToolInstaller, ABC):
+    @abstractmethod
+    def get_repo_url(self) -> str: ...
+
+    @abstractmethod
+    def build(self) -> None: ...
+
+    @abstractmethod
+    def get_install_path(self) -> Path: ...
+
+    @override
+    def install(self, version: str) -> None:
+        path = self.get_install_path()
+        if path.exists():
+            return
+        self._clone()
+        self._checkout(version)
+        self.build()
+
+    @override
+    def update(self, version: str) -> None:
+        self._pull_tags()
+        self._checkout(version)
+        self.build()
+
+    def _clone(self) -> None:
+        _ = Repo.clone_from(to_path=self.get_install_path(), url=self.get_repo_url())
+
+    def _pull_tags(self) -> None:
+        repo = Repo(self.get_install_path())
+        origin = repo.remotes.origin
+        _ = origin.fetch(tags=True, prune=True, force=True)
+
+    def _checkout(self, version: str) -> None:
+        repo = Repo(self.get_install_path())
+        _ = repo.git.execute(["git", "checkout", version])
