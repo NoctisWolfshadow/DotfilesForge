@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from importlib.resources import files
 from pathlib import Path
 from typing import TypeAlias, cast
 
 import tomllib
+
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override
 
 TomlValue: TypeAlias = (
     str | int | float | bool | list["TomlValue"] | dict[str, "TomlValue"]
@@ -67,7 +73,6 @@ class ToolConfig:
         return cls(enabled=enabled, version=version, install_method=install_method)
 
 
-@dataclass
 class Config:
     def __init__(self, toml: dict[str, TomlValue]):
         self.paths: PathConfig = PathConfig(
@@ -77,6 +82,10 @@ class Config:
         self.tools: dict[str, ToolConfig] = {
             name: ToolConfig.from_raw(data) for name, data in tools_raw.items()
         }
+
+    @override
+    def __repr__(self):
+        return f"Config(paths={self.paths!r}, tools={self.tools!r})"
 
 
 def get_config() -> Config:
