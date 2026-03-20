@@ -1,6 +1,6 @@
-import functools
 import sys
 from abc import ABC, abstractmethod
+from functools import cached_property
 from pathlib import Path
 
 from git import Repo
@@ -58,13 +58,13 @@ class GitBasedTool(ToolInstaller, ABC):
     @abstractmethod
     def build(self) -> None: ...
 
-    @functools.cached_property
-    def get_install_path(self) -> Path:
+    @cached_property
+    def install_path(self) -> Path:
         return Path(self.config.paths.git_repos) / self.tool_name
 
     @override
     def install(self, version: str) -> None:
-        path = self.get_install_path
+        path = self.install_path
         if path.exists():
             return
         self._clone()
@@ -78,13 +78,13 @@ class GitBasedTool(ToolInstaller, ABC):
         self.build()
 
     def _clone(self) -> None:
-        _ = Repo.clone_from(to_path=self.get_install_path, url=self.get_repo_url())
+        _ = Repo.clone_from(to_path=self.install_path, url=self.get_repo_url())
 
     def _pull_tags(self) -> None:
-        repo = Repo(self.get_install_path)
+        repo = Repo(self.install_path)
         origin = repo.remotes.origin
         _ = origin.fetch(tags=True, prune=True, force=True)
 
     def _checkout(self, version: str) -> None:
-        repo = Repo(self.get_install_path)
+        repo = Repo(self.install_path)
         _ = repo.git.execute(["git", "checkout", version])
