@@ -6,11 +6,10 @@ readme = "README.md"
 authors = [
     { name = "NoctisWolfshadow", email = "basilgarrad@yahoo.de" }
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "gitpython>=3.1.46",
     "packaging>=26.0",
-    "tomli>=1.1.0 ; python_full_version < '3.11'",
     "typing-extensions>=4.15.0",
 ]
 
