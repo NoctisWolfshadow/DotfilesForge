@@ -95,9 +95,17 @@ def get_config() -> Config:
     return _config
 
 
+def get_toml_path() -> Path | None:
+    candidates = [
+        Path.home() / ".dotfiles" / "dotfilesforge.toml",
+        Path.home() / ".config" / "dotfilesforge" / "dotfilesforge.toml",
+    ]
+    return next((path for path in candidates if path.exists()), None)
+
+
 def load_toml_config() -> dict[str, TomlValue]:
-    path = Path.home() / ".dotfiles" / "dotfilesforge.toml"
-    if path.exists():
+    path = get_toml_path()
+    if path:
         with open(path, "rb") as file:
             toml = tomllib.load(file)
     else:
