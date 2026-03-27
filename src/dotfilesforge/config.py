@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import sys
+import tomllib
 from dataclasses import dataclass, field
 from importlib.resources import files
 from pathlib import Path
 from typing import TypeAlias, cast
-
-import tomllib
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -48,14 +47,14 @@ class ToolConfig:
     install_method: str = "default"
 
     @classmethod
-    def from_raw(cls, data: dict[str, str | bool | None]) -> ToolConfig:
-        enabled = data.get("enabled")
+    def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
+        enabled = data.get("enabled", False)
         if not isinstance(enabled, bool):
             raise ValueError(
                 f"Invalid config: 'enabled' must be a bool, got {type(enabled).__name__!r} ({enabled!r})"
             )
 
-        version = data.get("version")
+        version = data.get("version", "latest")
         if version is not None and not isinstance(version, str):
             raise ValueError(
                 f"Invalid config: 'version' must be a string or null, got {type(version).__name__!r}"
@@ -64,10 +63,10 @@ class ToolConfig:
         install_method = data.get("install_method", "default")
         if (
             not isinstance(install_method, str)
-            or install_method not in VALID_INSTALL_METHODS
+            or install_method not in VALID_INSTALL_METHODS[name]
         ):
             raise ValueError(
-                f"Invalid config: 'install_method' must be one of {VALID_INSTALL_METHODS}, got {install_method!r}"
+                f"Invalid config: 'install_method' must be one of {VALID_INSTALL_METHODS[name]}, got {install_method!r}"
             )
 
         return cls(enabled=enabled, version=version, install_method=install_method)
@@ -80,7 +79,9 @@ class Config:
         )
         tools_raw = cast(dict[str, dict[str, str | bool | None]], toml.get("tools", {}))
         self.tools: dict[str, ToolConfig] = {
-            name: ToolConfig.from_raw(data) for name, data in tools_raw.items()
+            name: tool
+            for name, data in tools_raw.items()
+            if (tool := ToolConfig.from_raw(data, name)).enabled
         }
 
     @override
