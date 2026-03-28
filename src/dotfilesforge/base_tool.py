@@ -6,6 +6,7 @@ from pathlib import Path
 from git import Repo
 from packaging.version import Version
 
+from src.dotfilesforge import logger
 from src.dotfilesforge.config import Config, get_config
 
 if sys.version_info < (3, 12):
@@ -40,15 +41,15 @@ class ToolInstaller(ABC):
         latest = self.get_latest_version()
 
         if not current:
-            print(f"Installing {self.tool_name}...")
+            logger.info(f"Installing {self.tool_name}...")
             self.install(latest)
             return
 
         if Version(current) < Version(latest):
-            print(f"Updating {self.tool_name} from {current} to {latest}...")
+            logger.info(f"Updating {self.tool_name} from {current} to {latest}...")
             self.update(latest)
         else:
-            print(f"{self.tool_name} is up to date ({current})")
+            logger.info(f"{self.tool_name} is up to date ({current})")
 
 
 class GitBasedTool(ToolInstaller, ABC):
