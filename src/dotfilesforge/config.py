@@ -3,9 +3,10 @@ from __future__ import annotations
 import sys
 import tomllib
 from dataclasses import dataclass, field
-from importlib.resources import files
 from pathlib import Path
 from typing import TypeAlias, cast
+
+from dotfilesforge import logger
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -50,14 +51,18 @@ class ToolConfig:
     def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
         enabled = data.get("enabled", False)
         if not isinstance(enabled, bool):
-            raise ValueError(
-                f"Invalid config: 'enabled' must be a bool, got {type(enabled).__name__!r} ({enabled!r})"
+            raise SystemExit(
+                logger.error(
+                    f"Invalid config ({name}): 'enabled' must be a bool, got {type(enabled).__name__!r} ({enabled!r})"
+                )
             )
 
         version = data.get("version", "latest")
         if version is not None and not isinstance(version, str):
-            raise ValueError(
-                f"Invalid config: 'version' must be a string or null, got {type(version).__name__!r}"
+            raise SystemExit(
+                logger.error(
+                    f"Invalid config ({name}): 'version' must be a string or null, got {type(version).__name__!r}"
+                )
             )
 
         install_method = data.get("install_method", "default")
@@ -65,8 +70,10 @@ class ToolConfig:
             not isinstance(install_method, str)
             or install_method not in VALID_INSTALL_METHODS[name]
         ):
-            raise ValueError(
-                f"Invalid config: 'install_method' must be one of {VALID_INSTALL_METHODS[name]}, got {install_method!r}"
+            raise SystemExit(
+                logger.error(
+                    f"Invalid config ({name}): 'install_method' must be one of {VALID_INSTALL_METHODS[name]}, got {install_method!r}"
+                )
             )
 
         return cls(enabled=enabled, version=version, install_method=install_method)
@@ -99,7 +106,7 @@ def get_config() -> Config:
 def get_toml_path() -> Path | None:
     candidates = [
         Path.home() / ".dotfiles" / "dotfilesforge.toml",
-        Path.home() / ".config" / "dotfilesforge" / "dotfilesforge.toml",
+        Path.home() / ".config" / "dotfilesforge" / "config.toml",
     ]
     return next((path for path in candidates if path.exists()), None)
 
@@ -110,6 +117,5 @@ def load_toml_config() -> dict[str, TomlValue]:
         with open(path, "rb") as file:
             toml = tomllib.load(file)
     else:
-        with files("dotfilesforge").joinpath("dotfilesforge.toml").open("rb") as file:
-            toml = tomllib.load(file)
+        raise SystemExit(logger.error("No Config file found. Exiting..."))
     return toml
