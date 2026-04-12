@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 from dataclasses import dataclass
 
 from dotfilesforge.config import Config, get_config
@@ -25,7 +26,7 @@ COMMAND_LIST: dict[str, dict[str, list[str]]] = {
 
 @dataclass
 class PackageManager:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config | None = None):
         self.package_manager: str = self.getPackageManager()
         self.commands: dict[str, list[str]] = COMMAND_LIST[self.package_manager]
         self.config: Config = config or get_config()
@@ -34,18 +35,14 @@ class PackageManager:
         return self.commands["update"]
 
     def getInstall(self) -> list[str]:
-        return self.commands["install"]
-
-    def searchPackage(self) -> list[str]:
-        return self.commands["search"]
-
-    def addPackages(self, method: list[str]):
         package_manager = self.package_manager
         packages: list[str] = self.config.packages[self.package_manager]
         if package_manager == "yay":
             packages = self.config.packages["pacman"] + packages
+        return self.commands["install"] + packages
 
-        return method + packages
+    def searchPackage(self) -> list[str]:
+        return self.commands["search"]
 
     def getPackageManager(self) -> str:
         if shutil.which("pacman"):
@@ -54,3 +51,9 @@ class PackageManager:
             return "pacman"
 
         raise SystemExit(logger.error("No valid Package Manager found."))
+
+
+def install_packages():
+    package_manager = PackageManager()
+    _ = subprocess.run(package_manager.getInstall())
+    pass
