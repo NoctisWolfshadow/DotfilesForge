@@ -90,10 +90,11 @@ class Config:
             for name, data in tools_raw.items()
             if (tool := ToolConfig.from_raw(data, name)).enabled
         }
+        self.packages: dict[str, list[str]] = toml.get("packages")
 
     @override
     def __repr__(self):
-        return f"Config(paths={self.paths!r}, tools={self.tools!r})"
+        return f"Config(paths={self.paths!r}, tools={self.tools!r}, packages={self.packages!r})"
 
 
 def get_config() -> Config:
