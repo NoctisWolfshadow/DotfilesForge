@@ -90,7 +90,9 @@ class Config:
             for name, data in tools_raw.items()
             if (tool := ToolConfig.from_raw(data, name)).enabled
         }
-        self.packages: dict[str, list[str]] = toml.get("packages")
+        self.packages: dict[str, list[str]] = cast(
+            dict[str, list[str]], toml.get("packages", {})
+        )
 
     @override
     def __repr__(self):
