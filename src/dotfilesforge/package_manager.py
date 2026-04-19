@@ -34,12 +34,15 @@ class PackageManager:
     def getUpdate(self) -> list[str]:
         return self.commands["update"]
 
-    def getInstall(self) -> list[str]:
+    def getPackages(self) -> list[str]:
         package_manager = self.package_manager
         packages: list[str] = self.config.packages[self.package_manager]
         if package_manager == "yay":
             packages = self.config.packages["pacman"] + packages
-        return self.commands["install"] + packages
+        return packages
+
+    def getInstall(self) -> list[str]:
+        return self.commands["install"]
 
     def searchPackage(self) -> list[str]:
         return self.commands["search"]
@@ -50,10 +53,11 @@ class PackageManager:
                 return "yay"
             return "pacman"
 
+        if shutil.which("apt"):
+            return "apt"
+
         raise SystemExit(logger.error("No valid Package Manager found."))
 
-
-def install_packages():
-    package_manager = PackageManager()
-    _ = subprocess.run(package_manager.getInstall())
-    pass
+    def install_packages(self, command: list[str], packages: list[str]) -> None:
+        _ = subprocess.run(command + packages)
+        pass
