@@ -30,6 +30,9 @@ class ToolInstaller(ABC):
     def get_latest_version(self) -> str: ...
 
     @abstractmethod
+    def get_dependecies(self) -> list[str]: ...
+
+    @abstractmethod
     def install(self, version: str) -> None: ...
 
     @abstractmethod
