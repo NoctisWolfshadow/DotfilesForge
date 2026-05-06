@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TypeAlias, cast
 
 from dotfilesforge import logger
+from dotfilesforge.representation import build_repr
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -34,6 +35,10 @@ class PathConfig:
     )
     git_repos: Path | str = field(default_factory=lambda: Path.home() / "git")
 
+    @override
+    def __repr__(self) -> str:
+        return build_repr(self)
+
     def __post_init__(self):
         for path in self.__dataclass_fields__:
             value: Path | str = cast(Path | str, getattr(self, path))
@@ -46,6 +51,10 @@ class ToolConfig:
     enabled: bool = False
     version: str | None = None
     install_method: str = "default"
+
+    @override
+    def __repr__(self) -> str:
+        return build_repr(self)
 
     @classmethod
     def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
@@ -95,8 +104,8 @@ class Config:
         )
 
     @override
-    def __repr__(self):
-        return f"Config(paths={self.paths!r}, tools={self.tools!r}, packages={self.packages!r})"
+    def __repr__(self) -> str:
+        return build_repr(self)
 
 
 def get_config() -> Config:

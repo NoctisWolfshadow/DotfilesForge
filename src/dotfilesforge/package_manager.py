@@ -1,9 +1,16 @@
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 
+if sys.version_info < (3, 12):
+    from typing_extensions import override
+else:
+    from typing import override
+
+from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
-from src.dotfilesforge import logger
+from dotfilesforge.representation import build_repr
 
 COMMAND_LIST: dict[str, dict[str, list[str]]] = {
     "pacman": {
@@ -30,6 +37,10 @@ class PackageManager:
         self.package_manager: str = self.getPackageManager()
         self.commands: dict[str, list[str]] = COMMAND_LIST[self.package_manager]
         self.config: Config = config or get_config()
+
+    @override
+    def __repr__(self) -> str:
+        return build_repr(self)
 
     def getUpdate(self) -> list[str]:
         return self.commands["update"]
@@ -60,4 +71,3 @@ class PackageManager:
 
     def install_packages(self, command: list[str], packages: list[str]) -> None:
         _ = subprocess.run(command + packages)
-        pass
