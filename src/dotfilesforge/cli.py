@@ -3,6 +3,8 @@ from pathlib import Path
 
 import click
 
+from dotfilesforge.tools.neovim import NeovimInstaller
+
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
@@ -18,6 +20,8 @@ def cli(ctx: click.Context, verbose: bool, config: Path):
 def install(ctx: click.Context, wsl: bool):
     """Install dotfiles and tools"""
     print("Installing dotfiles")
+    installer = NeovimInstaller()
+    print(installer.check_and_install())
 
 
 @cli.command()
