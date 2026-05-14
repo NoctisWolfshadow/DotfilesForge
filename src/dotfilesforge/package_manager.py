@@ -14,12 +14,12 @@ from dotfilesforge.representation import build_repr
 
 COMMAND_LIST: dict[str, dict[str, list[str]]] = {
     "pacman": {
-        "install": ["sudo", "pacman", "-S"],
+        "install": ["sudo", "pacman", "-S", "--noconfirm", "--needed"],
         "update": ["sudo", "pacman", "-Syu"],
         "search": ["pacman", "-Ss"],
     },
     "yay": {
-        "install": ["yay", "-S"],
+        "install": ["yay", "-S", "--noconfirm", "--needed"],
         "update": ["yay", "-Syu"],
         "search": ["yay", "-Ss"],
     },
@@ -29,6 +29,18 @@ COMMAND_LIST: dict[str, dict[str, list[str]]] = {
         "search": ["apt", "search"],
     },
 }
+
+BASE_PACKAGES: list[str] = [
+    "7zip",
+    "ccache",
+    "cmake",
+    "curl",
+    "gcc",
+    "gettext",
+    "git",
+    "stow",
+    "unzip",
+]
 
 
 @dataclass
@@ -42,8 +54,8 @@ class PackageManager:
     def __repr__(self) -> str:
         return build_repr(self)
 
-    def getUpdate(self) -> list[str]:
-        return self.commands["update"]
+    def update_packages(self) -> None:
+        _ = subprocess.run(self.commands["update"])
 
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
@@ -70,4 +82,4 @@ class PackageManager:
         raise SystemExit(logger.error("No valid Package Manager found."))
 
     def install_packages(self, command: list[str], packages: list[str]) -> None:
-        _ = subprocess.run(command + packages)
+        _ = subprocess.run(command + BASE_PACKAGES + packages)
