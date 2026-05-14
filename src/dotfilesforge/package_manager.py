@@ -81,5 +81,6 @@ class PackageManager:
 
         raise SystemExit(logger.error("No valid Package Manager found."))
 
-    def install_packages(self, command: list[str], packages: list[str]) -> None:
-        _ = subprocess.run(command + BASE_PACKAGES + packages)
+    def install_packages(self, packages: list[str]) -> None:
+        # Search packages from Config enabled Installers and add them for Install so this is only called once
+        _ = subprocess.run(self.getInstall() + BASE_PACKAGES + packages)
