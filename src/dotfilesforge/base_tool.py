@@ -6,8 +6,8 @@ from pathlib import Path
 from git import Repo
 from packaging.version import Version
 
-from src.dotfilesforge import logger
-from src.dotfilesforge.config import Config, get_config
+from dotfilesforge import logger
+from dotfilesforge.config import Config, get_config
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
