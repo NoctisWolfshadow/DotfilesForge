@@ -27,6 +27,7 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
 _config: Config | None = None
 
 
+# TODO: Save all Installers in a dict to access for dependencies and later usage?
 @dataclass
 class PathConfig:
     dotfiles: Path | str = field(default_factory=lambda: Path.home() / ".dotfiles")
