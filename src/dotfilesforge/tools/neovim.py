@@ -5,8 +5,9 @@ from pathlib import Path
 
 import requests
 
-from dotfilesforge.base_tool import ToolInstaller
+from dotfilesforge.base_tool import GitBasedTool, ToolInstaller
 from dotfilesforge.config import get_config
+from dotfilesforge.package_manager import PackageManager
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -25,7 +26,7 @@ class NeovimInstaller:
         )
 
         if method in ("git", "default"):
-            pass
+            return NeovimGitInstaller(config)
         elif method == "package":
             pass
         elif method == "bin":
@@ -110,3 +111,69 @@ class NeovimBinaryInstaller(ToolInstaller):
 
         # Install new version
         self.install(version)
+
+
+class NeovimGitInstaller(GitBasedTool):
+    """Install Neovim from Git source"""
+
+    @property
+    @override
+    def tool_name(self) -> str:
+        return "neovim"
+
+    @override
+    def get_repo_url(self) -> str:
+        return "https://github.com/neovim/neovim.git"
+
+    @override
+    def get_dependecies(self) -> list[str]:
+        package_manager = PackageManager().getPackageManager()
+        packages = []
+        if package_manager == "pacman" or package_manager == "yay":
+            packages = ["base-devel", "ninja"]
+
+        if package_manager == "apt":
+            packages = ["build-essential", "ninja-build"]
+
+        return packages
+
+    @override
+    def get_current_version(self) -> str | None:
+        if not shutil.which("nvim"):
+            return None
+        result = subprocess.check_output(["nvim", "--version"], text=True)
+        return result.splitlines()[0].split()[-1]
+
+    @override
+    def get_latest_version(self) -> str:
+        tags = subprocess.check_output(
+            [
+                "git",
+                "ls-remote",
+                "--tags",
+                "--refs",
+                "--sort=v:refname",
+                self.get_repo_url(),
+            ],
+            text=True,
+        )
+
+        if not tags:
+            raise RuntimeError("No version tags found")
+
+        latest = None
+        for tag in tags.strip().split("\n"):
+            if "refs/tags/v" in tag:
+                latest = tag.split("/")[-1]
+
+        if not latest:
+            raise RuntimeError("No version tag found")
+
+        return latest
+
+    @override
+    def build(self) -> None:
+        """Build Neovim from source"""
+        path = self.install_path
+        _ = subprocess.check_call(["make", "CMAKE_BUILD_TYPE=RelWithDebInfo"], cwd=path)
+        _ = subprocess.check_call(["sudo", "make", "install"], cwd=path)
