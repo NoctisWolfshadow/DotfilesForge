@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TypeAlias, cast
+
+import git
 
 from dotfilesforge import logger
 from dotfilesforge.representation import build_repr
@@ -27,7 +30,6 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
 _config: Config | None = None
 
 
-# TODO: Save all Installers in a dict to access for dependencies and later usage?
 @dataclass
 class PathConfig:
     dotfiles: Path | str = field(default_factory=lambda: Path.home() / ".dotfiles")
@@ -103,16 +105,19 @@ class Config:
         self.packages: dict[str, list[str]] = cast(
             dict[str, list[str]], toml.get("packages", {})
         )
+        self.dotfiles: dict[str, TomlValue] = cast(
+            dict[str, TomlValue], toml.get("dotfiles", {})
+        )
 
     @override
     def __repr__(self) -> str:
         return build_repr(self)
 
 
-def get_config() -> Config:
+def get_config(url: str | None = None) -> Config:
     global _config
     if _config is None:
-        _config = Config(load_toml_config())
+        _config = Config(load_toml_config(url))
     return _config
 
 
@@ -124,11 +129,27 @@ def get_toml_path() -> Path | None:
     return next((path for path in candidates if path.exists()), None)
 
 
-def load_toml_config() -> dict[str, TomlValue]:
+def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
     path = get_toml_path()
-    if path:
+    toml = None
+    if path and url is None:
         with open(path, "rb") as file:
             toml = tomllib.load(file)
-    else:
+    if url:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _ = git.Repo.clone_from(url, tmp_dir)
+
+            remote_config = Path(tmp_dir) / "dotfilesforge.toml"
+            if not remote_config.exists():
+                raise SystemExit(
+                    logger.error(
+                        f"'dotfilesforge.toml' not found in repository '{url}'."
+                    )
+                )
+
+            with open(remote_config, "rb") as f:
+                toml = tomllib.load(f)
+
+    if toml is None:
         raise SystemExit(logger.error("No Config file found. Exiting..."))
     return toml
