@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import platform
 import sys
 import tempfile
 import tomllib
@@ -28,6 +30,7 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
 }
 
 _config: Config | None = None
+_wsl: bool = False
 
 
 @dataclass
@@ -62,6 +65,10 @@ class ToolConfig:
     @classmethod
     def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
         enabled = data.get("enabled", False)
+        global _wsl
+        if data.get("wsl", True) == False and _wsl:
+            enabled = False
+
         if not isinstance(enabled, bool):
             raise SystemExit(
                 logger.error(
@@ -153,3 +160,42 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
     if toml is None:
         raise SystemExit(logger.error("No Config file found. Exiting..."))
     return toml
+
+
+def set_wsl(wsl: bool) -> None:
+    global _wsl
+    if wsl:
+        print("Option\n")
+        _wsl = wsl
+        return
+    check_if_wsl()
+
+
+def check_if_wsl() -> None:
+    """
+    From inside the Linux terminal:Check kernel version (Fastest): Run uname -a or cat /proc/version.
+    If the output contains Microsoft or -WSL, you are in WSL.
+    Check environment variables: Run env | grep -i wsl.
+    If it returns WSL_DISTRO_NAME or WSL_INTEROP, WSL is active.
+    Check system files: Look for the WSL interoperability file with ls -la /proc/sys/fs/binfmt_misc/WSLInterop.
+    Its presence confirms a WSL environment.
+    """
+    global _wsl
+
+    if _wsl:
+        return
+
+    proc_version: str = platform.release()
+    if proc_version.find("wsl"):
+        _wsl = True
+        return
+
+    interop_file = Path("/proc/sys/fs/binfmt_misc/WSLInterop")
+    if interop_file.exists():
+        _wsl = True
+        return
+
+    wsl_vars = {k: v for k, v in os.environ.items() if "wsl" in k.lower()}
+    if wsl_vars:
+        _wsl = True
+        return
