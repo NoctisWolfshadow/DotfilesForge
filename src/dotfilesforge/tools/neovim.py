@@ -7,7 +7,7 @@ import requests
 
 from dotfilesforge.base_tool import GitBasedTool, ToolInstaller
 from dotfilesforge.config import get_config
-from dotfilesforge.package_manager import PackageManager
+from dotfilesforge.package_manager import get_package_manager
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -27,8 +27,6 @@ class NeovimInstaller:
 
         if method in ("git", "default"):
             return NeovimGitInstaller(config)
-        elif method == "package":
-            pass
         elif method == "bin":
             return NeovimBinaryInstaller(config)
         else:
@@ -127,7 +125,7 @@ class NeovimGitInstaller(GitBasedTool):
 
     @override
     def get_dependecies(self) -> list[str]:
-        package_manager = PackageManager().getPackageManager()
+        package_manager = get_package_manager().getPackageManager()
         packages = []
         if package_manager == "pacman" or package_manager == "yay":
             packages = ["base-devel", "ninja"]
