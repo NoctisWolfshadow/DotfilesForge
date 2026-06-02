@@ -25,8 +25,8 @@ TomlValue: TypeAlias = (
 
 VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
     "neovim": frozenset({"default", "package", "git", "bin"}),
-    "ghostty": frozenset({"default", "package", "git", "bin"}),
-    "yazi": frozenset({"default", "package", "git", "bin"}),
+    # "ghostty": frozenset({"default", "package", "git", "bin"}),
+    # "yazi": frozenset({"default", "package", "git", "bin"}),
 }
 
 _config: Config | None = None
