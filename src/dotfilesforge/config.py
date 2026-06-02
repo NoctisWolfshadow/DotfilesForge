@@ -115,6 +115,9 @@ class Config:
         self.dotfiles: dict[str, TomlValue] = cast(
             dict[str, TomlValue], toml.get("dotfiles", {})
         )
+        self.services: dict[str, TomlValue] = cast(
+            dict[str, TomlValue], toml.get("services", {})
+        )
 
     @override
     def __repr__(self) -> str:
