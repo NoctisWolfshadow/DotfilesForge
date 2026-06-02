@@ -1,27 +1,33 @@
 # src/main.py (refactored with click)
-from pathlib import Path
+
 
 import click
 
-from dotfilesforge.tools.neovim import NeovimInstaller
+from dotfilesforge.config import get_config, set_wsl
+from dotfilesforge.tools.factory import install_dependencies
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
-@click.option("--config", type=click.Path(), help="Path to config file")
 @click.pass_context
-def cli(ctx: click.Context, verbose: bool, config: Path):
+def cli(ctx: click.Context, verbose: bool):
     pass
 
 
 @cli.command()
 @click.option("--wsl", is_flag=True, help="Exclude WSL-incompatible programs")
+@click.option(
+    "--remote-config",
+    type=click.STRING,
+    help="For Installs if you want DotfilesForge to install your Repo",
+)
 @click.pass_context
-def install(ctx: click.Context, wsl: bool):
+def install(ctx: click.Context, wsl: bool, remote_config: str | None):
     """Install dotfiles and tools"""
     print("Installing dotfiles")
-    installer = NeovimInstaller()
-    print(installer.check_and_install())
+    set_wsl(wsl)
+    print(get_config())
+    print(install_dependencies())
 
 
 @cli.command()
