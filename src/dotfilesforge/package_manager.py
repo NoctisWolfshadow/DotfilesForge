@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import shutil
 import subprocess
 import sys
@@ -25,7 +27,8 @@ COMMAND_LIST: dict[str, dict[str, list[str]]] = {
     },
     "apt": {
         "install": ["sudo", "apt", "install"],
-        "update": ["sudo", "apt", "update", "&&", "sudo", "apt", "upgrade", "-y"],
+        "update": ["sudo", "apt", "update"],
+        "upgrade": ["&&", "sudo", "apt", "upgrade", "-y"],
         "search": ["apt", "search"],
     },
 }
@@ -42,6 +45,8 @@ BASE_PACKAGES: list[str] = [
     "unzip",
 ]
 
+_package_manager: PackageManager | None = None
+
 
 @dataclass
 class PackageManager:
@@ -55,7 +60,10 @@ class PackageManager:
         return build_repr(self)
 
     def update_packages(self) -> None:
-        _ = subprocess.run(self.commands["update"])
+        cmd = self.commands["update"]
+        if self.package_manager == "apt":
+            cmd += self.commands["upgrade"]
+        _ = subprocess.run(cmd)
 
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
@@ -83,4 +91,12 @@ class PackageManager:
 
     def install_packages(self, packages: list[str]) -> None:
         # Search packages from Config enabled Installers and add them for Install so this is only called once
-        _ = subprocess.run(self.getInstall() + BASE_PACKAGES + packages)
+        unique_packages = list(set(BASE_PACKAGES + packages))
+        _ = subprocess.run(self.getInstall() + unique_packages)
+
+
+def get_package_manager() -> PackageManager:
+    global _package_manager
+    if _package_manager is None:
+        _package_manager = PackageManager()
+    return _package_manager
