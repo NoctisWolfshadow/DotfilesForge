@@ -2,7 +2,9 @@ from typing import Callable
 
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
+from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.neovim import NeovimInstaller
+from dotfilesforge.tools.shell import get_shell
 
 _installers: list[ToolInstaller] | None = None
 
@@ -21,3 +23,15 @@ def get_installers() -> list[ToolInstaller]:
             if tool.enabled and name in INSTALLER_MAP
         ]
     return _installers
+
+
+def install_dependencies():
+    installers = get_installers()
+    package_manager = get_package_manager()
+    packages: list[str] = []
+    for installer in installers:
+        packages.extend(installer.get_dependecies())
+
+    packages.append(get_shell().getPackage())
+    print(packages)
+    _ = package_manager.install_packages(packages)
