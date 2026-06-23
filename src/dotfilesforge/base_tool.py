@@ -14,6 +14,8 @@ if sys.version_info < (3, 12):
 else:
     from typing import override
 
+VERSION_STRINGS = ["tip"]
+
 
 class ToolInstaller(ABC):
     def __init__(self, config: Config | None = None):
@@ -41,16 +43,18 @@ class ToolInstaller(ABC):
     def check_and_install(self) -> None:
 
         current = self.get_current_version()
-        latest = self.get_latest_version()
+        version = self.config.tools[self.tool_name].version
+        if not version or version.lower() == "latest":
+            version = self.get_latest_version()
 
         if not current:
             logger.info(f"Installing {self.tool_name}...")
-            self.install(latest)
+            self.install(version)
             return
 
-        if Version(current) < Version(latest):
-            logger.info(f"Updating {self.tool_name} from {current} to {latest}...")
-            self.update(latest)
+        if version in VERSION_STRINGS or Version(current) < Version(version):
+            logger.info(f"Updating {self.tool_name} from {current} to {version}...")
+            self.update(version)
         else:
             logger.info(f"{self.tool_name} is up to date ({current})")
 
