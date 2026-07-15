@@ -27,7 +27,7 @@ class ZigInstaller:
             else "git"
         )
 
-        if method in ("git", "default"):
+        if method in ("bin", "default"):
             return ZigBinaryInstaller(config)
         else:
             raise ValueError(f"Unknown install method: {method}")
