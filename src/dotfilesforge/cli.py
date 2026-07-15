@@ -3,8 +3,8 @@
 
 import click
 
-from dotfilesforge.config import get_config, set_wsl
-from dotfilesforge.tools.factory import install_dependencies
+from dotfilesforge.config import set_wsl
+from dotfilesforge.tools.ghostty import GhosttyInstaller
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -26,8 +26,13 @@ def install(ctx: click.Context, wsl: bool, remote_config: str | None):
     """Install dotfiles and tools"""
     print("Installing dotfiles")
     set_wsl(wsl)
-    print(get_config())
-    print(install_dependencies())
+    GhosttyInstaller().check_and_install()
+    # print(get_config())
+    # installers = get_installers()
+    # for installer in installers:
+    #     installer.check_and_install()
+    #
+    # print(install_dependencies())
 
 
 @cli.command()
