@@ -115,8 +115,8 @@ class Config:
         self.dotfiles: dict[str, TomlValue] = cast(
             dict[str, TomlValue], toml.get("dotfiles", {})
         )
-        self.services: dict[str, TomlValue] = cast(
-            dict[str, TomlValue], toml.get("services", {})
+        self.shell: dict[str, TomlValue] = cast(
+            dict[str, TomlValue], toml.get("shell", {})
         )
 
     @override

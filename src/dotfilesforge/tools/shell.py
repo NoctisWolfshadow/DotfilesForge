@@ -21,7 +21,7 @@ _shell: base_shell | None = None
 class Shell:
     def __new__(cls) -> base_shell:
         config = get_config()
-        shell: str = cast(str, config.services.get("shell"))
+        shell: str = cast(str, config.shell.get("name"))
 
         if shell == "zsh":
             return ZSH()
