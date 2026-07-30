@@ -34,5 +34,4 @@ def install_dependencies():
 
     packages = packages + package_manager.getPackages()
     packages.append(get_shell().getPackage())
-    print(packages)
     _ = package_manager.install_packages(packages)
