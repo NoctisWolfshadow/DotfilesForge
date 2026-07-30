@@ -45,6 +45,12 @@ BASE_PACKAGES: list[str] = [
     "unzip",
 ]
 
+# TODO: add to packages config array as true
+PHP_PACKAGES: dict[str, list[str]] = {
+    "pacman": ["php", "php-gd", "php-sqlite", "php-pgsql", "xdebug"],
+    "apt": ["php"],
+}
+
 _package_manager: PackageManager | None = None
 
 
@@ -68,6 +74,13 @@ class PackageManager:
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
         packages: list[str] = self.config.packages[self.package_manager]
+        if self.config.packages["php"]:
+            if package_manager == "apt":
+                # TODO: if apt add ppa for php (ondrej/php)
+                _ = subprocess.run(
+                    ["sudo", package_manager, "add-apt-repository", "ppa:ondrej/php"]
+                )
+            packages = packages + PHP_PACKAGES[package_manager]
         if package_manager == "yay":
             packages = self.config.packages["pacman"] + packages
         return packages
@@ -92,6 +105,7 @@ class PackageManager:
     def install_packages(self, packages: list[str]) -> None:
         # Search packages from Config enabled Installers and add them for Install so this is only called once
         unique_packages = list(set(BASE_PACKAGES + packages))
+        # print(unique_packages)
         _ = subprocess.run(self.getInstall() + unique_packages)
 
 

@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
@@ -32,6 +32,7 @@ def install_dependencies():
     for installer in installers:
         packages.extend(installer.get_dependecies())
 
+    packages = packages + package_manager.getPackages()
     packages.append(get_shell().getPackage())
     print(packages)
     _ = package_manager.install_packages(packages)
