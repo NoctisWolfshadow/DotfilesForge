@@ -45,7 +45,6 @@ BASE_PACKAGES: list[str] = [
     "unzip",
 ]
 
-# TODO: add to packages config array as true
 PHP_PACKAGES: dict[str, list[str]] = {
     "pacman": ["php", "php-gd", "php-sqlite", "php-pgsql", "xdebug"],
     "apt": ["php"],
