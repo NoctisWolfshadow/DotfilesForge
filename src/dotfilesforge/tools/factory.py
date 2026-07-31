@@ -3,14 +3,19 @@ from collections.abc import Callable
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 from dotfilesforge.package_manager import get_package_manager
+from dotfilesforge.tools.composer import ComposerInstaller
+from dotfilesforge.tools.ghostty import GhosttyInstaller
 from dotfilesforge.tools.neovim import NeovimInstaller
+from dotfilesforge.tools.opencode import OpencodeInstaller
 from dotfilesforge.tools.shell import get_shell
 
 _installers: list[ToolInstaller] | None = None
 
 INSTALLER_MAP: dict[str, Callable[[], ToolInstaller]] = {
     "neovim": NeovimInstaller,
-    # "ghostty": GhosttyInstaller,
+    "ghostty": GhosttyInstaller,
+    "opencode": OpencodeInstaller,
+    "composer": ComposerInstaller,
 }
 
 
