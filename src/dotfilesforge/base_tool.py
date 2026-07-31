@@ -8,6 +8,7 @@ from packaging.version import Version
 
 from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
+from dotfilesforge.representation import build_repr
 
 if sys.version_info < (3, 12):
     from typing_extensions import override
@@ -20,6 +21,9 @@ VERSION_STRINGS = ["tip"]
 class ToolInstaller(ABC):
     def __init__(self, config: Config | None = None):
         self.config: Config = config or get_config()
+
+    def __repr__(self) -> str:
+        return build_repr(self)
 
     @property
     @abstractmethod
