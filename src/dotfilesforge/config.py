@@ -26,6 +26,8 @@ TomlValue: TypeAlias = (
 VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
     "neovim": frozenset({"default", "package", "git", "bin"}),
     "ghostty": frozenset({"default", "package", "git", "bin"}),
+    "opencode": frozenset({"default", "bin"}),
+    "composer": frozenset({"default"}),
     # "yazi": frozenset({"default", "package", "git", "bin"}),
 }
 
@@ -91,7 +93,7 @@ class ToolConfig:
         ):
             raise SystemExit(
                 logger.error(
-                    f"Invalid config ({name}): 'install_method' must be one of {VALID_INSTALL_METHODS[name]}, got {install_method!r}"
+                    f"Invalid config ({name}): 'install_method' must be one of {', '.join(VALID_INSTALL_METHODS[name])!r} got {install_method!r}"
                 )
             )
 
@@ -119,12 +121,16 @@ class Config:
             dict[str, TomlValue], toml.get("shell", {})
         )
 
+        if self.packages.get("php") == True:
+            self.tools["composer"] = ToolConfig(True, "latest")
+
     @override
     def __repr__(self) -> str:
         return build_repr(self)
 
 
-def get_config(url: str | None = None) -> Config:
+def get_config(wsl: bool = False, url: str | None = None) -> Config:
+    set_wsl(wsl)
     global _config
     if _config is None:
         _config = Config(load_toml_config(url))
