@@ -25,10 +25,14 @@ TomlValue: TypeAlias = (
 
 VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
     "neovim": frozenset({"default", "package", "git", "bin"}),
-    "ghostty": frozenset({"default", "package", "git", "bin"}),
+    "ghostty": frozenset({"default", "package", "git"}),
     "opencode": frozenset({"default", "bin"}),
     "composer": frozenset({"default"}),
-    # "yazi": frozenset({"default", "package", "git", "bin"}),
+    "fzf": frozenset({"default", "package", "bin"}),
+    "rustup": frozenset({"default"}),
+    "yazi": frozenset({"default", "package", "git"}),
+    "laravel": frozenset({"default"}),
+    "zig": frozenset({"default", "bin"}),
 }
 
 _config: Config | None = None
