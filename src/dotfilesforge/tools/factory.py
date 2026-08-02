@@ -35,7 +35,7 @@ def install_dependencies():
     package_manager = get_package_manager()
     packages: list[str] = []
     for installer in installers:
-        packages.extend(installer.get_dependecies())
+        packages.extend(installer.get_dependencies())
 
     packages = packages + package_manager.getPackages()
     packages.append(get_shell().getPackage())

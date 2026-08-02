@@ -41,7 +41,7 @@ class ComposerBinaryInstaller(ToolInstaller):
         return result.splitlines()[-1].split()[2]
 
     @override
-    def get_dependecies(self) -> list[str]:
+    def get_dependencies(self) -> list[str]:
         return ["php"]
 
     @override

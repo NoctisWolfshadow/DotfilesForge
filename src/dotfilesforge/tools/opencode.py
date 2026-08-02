@@ -21,7 +21,7 @@ class OpencodeInstaller:
         method: str = (
             tool_config.install_method
             if tool_config and tool_config.install_method
-            else "git"
+            else "default"
         )
 
         if method in ("bin", "default"):
@@ -44,7 +44,7 @@ class OpencodeBinaryInstaller(ToolInstaller):
         return result.splitlines()[0].split()[-1]
 
     @override
-    def get_dependecies(self) -> list[str]:
+    def get_dependencies(self) -> list[str]:
         return ["curl"]
 
     @override

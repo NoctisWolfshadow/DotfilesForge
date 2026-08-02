@@ -22,7 +22,7 @@ class NeovimInstaller:
         method: str = (
             tool_config.install_method
             if tool_config and tool_config.install_method
-            else "git"
+            else "default"
         )
 
         if method in ("git", "default"):
@@ -47,7 +47,7 @@ class NeovimBinaryInstaller(ToolInstaller):
         return result.splitlines()[0].split()[-1]
 
     @override
-    def get_dependecies(self) -> list[str]:
+    def get_dependencies(self) -> list[str]:
         return []
 
     @override
@@ -124,7 +124,7 @@ class NeovimGitInstaller(GitBasedTool):
         return "https://github.com/neovim/neovim.git"
 
     @override
-    def get_dependecies(self) -> list[str]:
+    def get_dependencies(self) -> list[str]:
         package_manager = get_package_manager().getPackageManager()
         packages = []
         if package_manager == "pacman" or package_manager == "yay":
