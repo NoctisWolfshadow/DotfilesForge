@@ -1,9 +1,7 @@
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 
-import requests
 from packaging.version import Version
 
 from dotfilesforge import logger
@@ -25,13 +23,13 @@ class GhosttyInstaller:
         method: str = (
             tool_config.install_method
             if tool_config and tool_config.install_method
-            else "git"
+            else "default"
         )
 
         if method in ("git", "default"):
             return GhosttyGitInstaller(config)
-        elif method == "bin":
-            return GhosttyBinaryInstaller(config)
+        elif method == "package":
+            return GhosttyPackageInstaller(config)
         else:
             raise ValueError(f"Unknown install method: {method}")
 
@@ -44,74 +42,28 @@ class GhosttyPackageInstaller(ToolInstaller):
 
     @override
     def get_current_version(self) -> str | None:
-        if not shutil.which("ghostty"):
-            return None
-        result = subprocess.check_output(["ghostty", "+version"], text=True)
-        return result.splitlines()[0].split()[-1]
+        return None
 
     @override
-    def get_dependecies(self) -> list[str]:
-        return []
+    def get_dependencies(self) -> list[str]:
+        package_manager = get_package_manager().getPackageManager()
+        dependencies: list[str] = []
+        if package_manager == "pacman" or package_manager == "yay":
+            dependencies.append("ghostty")
+
+        return dependencies
 
     @override
     def get_latest_version(self) -> str:
-        """Get latest binary release version from GitHub"""
-        response = requests.get(
-            "https://api.github.com/repos/ghostty/ghostty/releases/latest"
-        )
-        response.raise_for_status()
-        return response.json()["tag_name"]
+        return ""
 
     @override
     def install(self, version: str) -> None:
-        """Install from pre-built binary tarball"""
-        import tarfile
-
-        # Download binary
-        url = f"https://github.com/ghostty-org/ghostty/releases/download/{version}/nvim-linux64.tar.gz"
-        tarball_path = Path.home() / f"nvim-{version}.tar.gz"
-
-        print(f"Downloading {url}...")
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-
-        with open(tarball_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                _ = f.write(chunk)
-
-        # Extract
-        extract_path = Path("/opt/nvim")
-        print(f"Extracting to {extract_path}...")
-
-        with tarfile.open(tarball_path, "r:gz") as tar:
-            tar.extractall(path=extract_path.parent)
-
-        # Create symlink
-        _ = subprocess.check_call(
-            [
-                "sudo",
-                "ln",
-                "-sf",
-                str(extract_path / "bin" / "nvim"),
-                "/usr/local/bin/nvim",
-            ]
-        )
-
-        # Cleanup
-        tarball_path.unlink()
-
-        print(f"Neovim {version} installed successfully")
+        pass
 
     @override
     def update(self, version: str) -> None:
-        """Update binary installation"""
-        # Remove old version
-        extract_path = Path("/opt/nvim")
-        if extract_path.exists():
-            _ = subprocess.check_call(["sudo", "rm", "-rf", str(extract_path)])
-
-        # Install new version
-        self.install(version)
+        pass
 
 
 class GhosttyGitInstaller(GitBasedTool):
@@ -133,7 +85,7 @@ class GhosttyGitInstaller(GitBasedTool):
         return "https://github.com/ghostty-org/ghostty.git"
 
     @override
-    def get_dependecies(self) -> list[str]:
+    def get_dependencies(self) -> list[str]:
         package_manager = get_package_manager().getPackageManager()
         packages = []
         if package_manager == "pacman" or package_manager == "yay":
@@ -268,8 +220,6 @@ class GhosttyGitInstaller(GitBasedTool):
             version = self.installable_ghostty_version(True)
 
         self.get_zig_version(version)
-        print(self.zig_version)
-        raise SystemExit()
         if not current:
             logger.info(f"Installing {self.tool_name}...")
             self.install(version)
