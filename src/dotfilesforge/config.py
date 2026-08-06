@@ -33,6 +33,7 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
     "yazi": frozenset({"default", "package", "git"}),
     "laravel": frozenset({"default"}),
     "zig": frozenset({"default", "bin"}),
+    "obsidian": frozenset({"default", "appimage"}),
 }
 
 _config: Config | None = None
@@ -42,9 +43,7 @@ _wsl: bool = False
 @dataclass
 class PathConfig:
     dotfiles: Path | str = field(default_factory=lambda: Path.home() / ".dotfiles")
-    appimages: Path | str = field(
-        default_factory=lambda: Path.home() / ".dotfiles" / "AppImage"
-    )
+    appimages: Path | str = field(default_factory=lambda: Path.home() / "AppImages")
     git_repos: Path | str = field(default_factory=lambda: Path.home() / "git")
 
     @override
