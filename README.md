@@ -1,6 +1,11 @@
 
 # DotfilesForge
 
+## Disclaimer
+
+This Project is still activly being developed. Breaking changes can occur often.
+The first Release will be Stable but will not necessarily be without bugs.
+
 ## Description
 
 This Python CLI Tool trys to deliver a always repeatable install of your Dotfiles
