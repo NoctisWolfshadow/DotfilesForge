@@ -11,6 +11,11 @@ If you have Problems or want to ask something please head to here.
 This Project is still activly being developed. Breaking changes can occur often.
 The first Release will be Stable but will not necessarily be without bugs.
 
+If you find a Problem or Bug.
+Please create a Issue on the Forgejo Instance where you explain and also add Context.
+If you want to have other specific Installers you can also add them and then
+open a Pull Request so it will be added into the Project.
+
 ## Description
 
 This Python CLI Tool trys to deliver a always repeatable install of your Dotfiles
@@ -52,10 +57,8 @@ enabled=true
 version="0.11.6"
 install_method="default"
 
-[services]
-snap=true
-flatpak=false
-shell="zsh"
+[shell]
+name="zsh" # What Shell you want to install
 
 [packages]
 pacman=['blueprint-compiler', 'ninja', 'gcc']
@@ -69,3 +72,24 @@ repo_host="custom" # github, gitlab
 repo_url="gitlab.noctiswolfshadow.com"
 
 ```
+
+## Available Tools
+
+The most tested version most time is just `default`.
+If you dont know what to choose the best is also `default`
+
+Laravel and rustup only support `default`.
+The Method is just more described in the table for correctness.
+
+|Tool Name      | Install Methods      | Default |
+|---------------|----------------------|---------|
+|Ghostty        |Git, Package          |Git      |
+|Neovim         |Git, Package, Binary  |Git      |
+|Opencode       |Binary                |Binary   |
+|Composer       |Binary                |Binary   |
+|FZF            |Package, Binary       |Package  |
+|rustup         |Binary                |Binary   |
+|yazi           |Git, Package          |Git      |
+|Laravel        |Composer              |Composer |
+|Zig            |Binary                |Binary   |
+|Obsidian       |AppImage              |AppImage |
