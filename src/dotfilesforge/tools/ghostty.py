@@ -202,10 +202,10 @@ class GhosttyGitInstaller(GitBasedTool):
             version["gtk"]
         ) < Version("4.14"):
             installable_version = "v1.1.3"
-        elif use_tip:
+        if use_tip:
             installable_version = "tip"
         else:
-            installable_version = self.get_latest_version()
+            installable_version = f"v{self.get_latest_version()}"
 
         return installable_version
 
