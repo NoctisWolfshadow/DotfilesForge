@@ -12,7 +12,7 @@ else:
     from typing import override
 
 
-class FzFInstaller:
+class LaravelInstaller:
     def __new__(cls) -> ToolInstaller:
         config = get_config()
         laravel_enabled = config.packages.get("laravel", False)
