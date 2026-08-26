@@ -124,7 +124,7 @@ class Config:
             dict[str, TomlValue], toml.get("shell", {})
         )
 
-        if self.packages.get("php") == True:
+        if self.packages.get("php", False) == True:
             self.tools["composer"] = ToolConfig(True, "latest")
 
     @override
