@@ -2,6 +2,8 @@ import shutil
 import subprocess
 import sys
 
+import requests
+
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 from dotfilesforge.tools.composer import ComposerInstaller
@@ -40,11 +42,14 @@ class LaravelComposerInstaller(ToolInstaller):
 
     @override
     def get_current_version(self) -> str | None:
-        return None
+        if not shutil.which("laravel"):
+            return None
+        result = subprocess.check_output(["laravel", "-v"], text=True)
+        return result.splitlines()[0].split()[-1]
 
     @override
     def get_latest_version(self) -> str:
-        return ""
+        return self.get_latest_version_from_packagist()
 
     @override
     def install(self, version: str):
@@ -59,3 +64,15 @@ class LaravelComposerInstaller(ToolInstaller):
     @override
     def update(self, version: str):
         _ = subprocess.check_call(["composer", "global", "update", "laravel/installer"])
+
+    def get_latest_version_from_packagist(self) -> str:
+        url = "https://repo.packagist.org/p2/laravel/installer.json"
+        latest_version: str = requests.get(url).json()["packages"]["laravel/installer"][
+            0
+        ]["version"]
+        latest_version = latest_version.lstrip("v")
+
+        if not latest_version:
+            raise ValueError("No latest version found")
+
+        return latest_version
