@@ -34,19 +34,19 @@ class Dotfiles:
             raise SystemExit(logger.error("No Host for custom configured."))
 
         url = None
-        domain = "https://"
+        prefix = "https://"
 
         if self.config.dotfiles.get("repo_modus") == "ssh":
-            domain = "git@"
+            prefix = "git@"
 
         if platform == "github":
-            url = f"{domain}github.com/{repo_name}"
+            url = f"{prefix}github.com/{repo_name}"
 
         if platform == "gitlab":
-            url = f"{domain}gitlab.com/{repo_name}"
+            url = f"{prefix}gitlab.com/{repo_name}"
 
         if platform == "custom":
-            url = f"{domain}{host}/{repo_name}"
+            url = f"{prefix}{host}/{repo_name}"
 
         if url is None:
             raise SystemExit(logger.error("No valid URL created."))
@@ -76,7 +76,13 @@ class Dotfiles:
 
     def _pull(self) -> None:
         repo = Repo(self.install_path)
-        _ = repo.git.stash("push", "-m", "Temp Stash for Updates")
+        has_changes = repo.is_dirty(untracked_files=False)
+
+        if has_changes:
+            _ = repo.git.stash("push", "-m", "Temp Stash for Updates")
+
         origin = repo.remotes.origin
         _ = origin.pull()
-        _ = repo.git.stash("pop")
+
+        if has_changes:
+            _ = repo.git.stash("pop")
