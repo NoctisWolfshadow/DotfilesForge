@@ -29,9 +29,9 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
     "opencode": frozenset({"default", "bin"}),
     "composer": frozenset({"default"}),
     "fzf": frozenset({"default", "package", "bin"}),
-    "rustup": frozenset({"default"}),
+    "rustup": frozenset({"default", "script"}),
     "yazi": frozenset({"default", "package", "git"}),
-    "laravel": frozenset({"default"}),
+    "laravel": frozenset({"default", "composer"}),
     "zig": frozenset({"default", "bin"}),
     "obsidian": frozenset({"default", "appimage"}),
 }
