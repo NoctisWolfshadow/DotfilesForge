@@ -140,10 +140,12 @@ def get_config(wsl: bool = False, url: str | None = None) -> Config:
     return _config
 
 
-def get_toml_path() -> Path | None:
+def get_toml_path(base_path: Path | None = None) -> Path | None:
+    base_path = base_path or Path.home()
     candidates = [
-        Path.home() / ".dotfiles" / "dotfilesforge.toml",
-        Path.home() / ".config" / "dotfilesforge" / "config.toml",
+        base_path / ".dotfiles" / "dotfilesforge.toml",
+        base_path / ".config" / "dotfilesforge" / "config.toml",
+        base_path / "dotfilesforge.toml",
     ]
     return next((path for path in candidates if path.exists()), None)
 
@@ -158,8 +160,9 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
         with tempfile.TemporaryDirectory() as tmp_dir:
             _ = git.Repo.clone_from(url, tmp_dir)
 
-            remote_config = Path(tmp_dir) / "dotfilesforge.toml"
-            if not remote_config.exists():
+            remote_config: Path | None = get_toml_path(Path(tmp_dir))
+
+            if not remote_config:
                 raise SystemExit(
                     logger.error(
                         f"'dotfilesforge.toml' not found in repository '{url}'."
