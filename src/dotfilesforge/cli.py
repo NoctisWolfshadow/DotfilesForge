@@ -4,6 +4,7 @@
 import click
 
 from dotfilesforge.config import set_wsl
+from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.factory import get_installers, install_dependencies
 
 
@@ -41,6 +42,7 @@ def update(ctx: click.Context, wsl: bool):
     print("Updating dotfiles")
     set_wsl(wsl)
     installers = get_installers()
+    _ = get_package_manager().update_packages()
     for installer in installers:
         installer.check_and_install()
 
