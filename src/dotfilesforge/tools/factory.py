@@ -4,10 +4,14 @@ from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.composer import ComposerInstaller
+from dotfilesforge.tools.fzf import FzFInstaller
 from dotfilesforge.tools.ghostty import GhosttyInstaller
+from dotfilesforge.tools.laravel import LaravelInstaller
 from dotfilesforge.tools.neovim import NeovimInstaller
+from dotfilesforge.tools.obsidian import ObsidianInstaller
 from dotfilesforge.tools.opencode import OpencodeInstaller
 from dotfilesforge.tools.shell import get_shell
+from dotfilesforge.tools.yazi import YaziInstaller
 
 _installers: list[ToolInstaller] | None = None
 
@@ -16,6 +20,10 @@ INSTALLER_MAP: dict[str, Callable[[], ToolInstaller]] = {
     "ghostty": GhosttyInstaller,
     "opencode": OpencodeInstaller,
     "composer": ComposerInstaller,
+    "yazi": YaziInstaller,
+    "fzf": FzFInstaller,
+    "laravel": LaravelInstaller,
+    "obsidian": ObsidianInstaller,
 }
 
 
