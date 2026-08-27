@@ -76,7 +76,7 @@ class FzFBinaryInstaller(ToolInstaller):
         if not shutil.which("fzf"):
             return None
         result = subprocess.check_output(["fzf", "--version"], text=True)
-        return result.splitlines()[0].split()[-1]
+        return result.splitlines()[0].split()[0]
 
     @override
     def get_latest_version(self) -> str:

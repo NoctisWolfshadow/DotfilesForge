@@ -15,12 +15,17 @@ else:
 class LaravelInstaller:
     def __new__(cls) -> ToolInstaller:
         config = get_config()
-        laravel_enabled = config.packages.get("laravel", False)
+        tool_config = config.tools.get("yazi")
+        method: str = (
+            tool_config.install_method
+            if tool_config and tool_config.install_method
+            else "default"
+        )
 
-        if laravel_enabled:
+        if method in ("composer", "default"):
             return LaravelComposerInstaller()
         else:
-            raise ValueError("Unknown config value in 'packages.laravel'")
+            raise ValueError("Unknown config value in 'Tool.laravel'")
 
 
 class LaravelComposerInstaller(ToolInstaller):

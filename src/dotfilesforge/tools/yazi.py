@@ -110,7 +110,7 @@ class YaziGitInstaller(GitBasedTool):
             return None
 
         result = subprocess.check_output(["yazi", "--version"], text=True)
-        return result.splitlines()[0].split()[1]
+        return result.splitlines()[1].split()[1]
 
     @override
     def get_repo_url(self) -> str:

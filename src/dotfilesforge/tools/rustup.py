@@ -19,7 +19,16 @@ class RustupInstaller:
         config = get_config()
         tool_config = config.tools.get("rustup")
 
-        return RustupBinaryInstaller(config)
+        method: str = (
+            tool_config.install_method
+            if tool_config and tool_config.install_method
+            else "default"
+        )
+
+        if method in ("script", "default"):
+            return RustupBinaryInstaller(config)
+        else:
+            raise ValueError("Unknown config value in 'Tool.rustup'")
 
 
 class RustupBinaryInstaller(ToolInstaller):
