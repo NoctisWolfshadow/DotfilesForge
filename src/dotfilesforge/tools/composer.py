@@ -5,6 +5,7 @@ from pathlib import Path
 
 import requests
 
+from dotfilesforge import logger
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 
@@ -93,10 +94,10 @@ class ComposerBinaryInstaller(ToolInstaller):
             ],
             cwd=download_path,
         )
-        print(f"Composer {version} installed successfully")
+        logger.info(f"Composer '{version}' installed successfully")
 
     @override
     def update(self, version: str) -> None:
         _ = subprocess.check_call(["composer", "self-update"])
 
-        print(f"Composer updated to {version} successfully")
+        logger.info(f"Composer updated to '{version}' successfully")

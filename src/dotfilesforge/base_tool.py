@@ -57,10 +57,10 @@ class ToolInstaller(ABC):
             return
 
         if version in VERSION_STRINGS or Version(current) < Version(version):
-            logger.info(f"Updating {self.tool_name} from {current} to {version}...")
+            logger.info(f"Updating {self.tool_name} from '{current}' to '{version}'...")
             self.update(version)
         else:
-            logger.info(f"{self.tool_name} is up to date ({current})")
+            logger.info(f"{self.tool_name} is up to date ('{current}')")
 
 
 class GitBasedTool(ToolInstaller, ABC):

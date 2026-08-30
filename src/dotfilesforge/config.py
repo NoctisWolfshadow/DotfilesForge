@@ -186,7 +186,6 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
 def set_wsl(wsl: bool) -> None:
     global _wsl
     if wsl:
-        print("Option\n")
         _wsl = wsl
         return
     check_if_wsl()

@@ -75,7 +75,7 @@ class ZigBinaryInstaller(ToolInstaller):
         url = f"https://codeberg.org/ziglang/zig/archive/{version}.tar.gz"
         tarball_path = Path(self.config.paths.git_repos) / f"zig-{version}.tar.gz"
 
-        print(f"Downloading {url}...")
+        logger.info(f"Downloading '{url}'...")
         response = requests.get(url, stream=True)
         response.raise_for_status()
 
@@ -86,7 +86,7 @@ class ZigBinaryInstaller(ToolInstaller):
         # Extract
         extract_path = Path(f"{self.config.paths.git_repos}/{self.tool_name}")
         extract_path.mkdir(parents=True, exist_ok=True)
-        print(f"Extracting to {extract_path}...")
+        logger.info(f"Extracting to '{extract_path}'...")
 
         with tarfile.open(tarball_path, "r:gz") as tar:
             for member in tar.getmembers():
@@ -99,7 +99,7 @@ class ZigBinaryInstaller(ToolInstaller):
         # Cleanup
         tarball_path.unlink()
 
-        print(f"Zig {version} installed successfully")
+        logger.info(f"Zig '{version}' installed successfully")
 
     @override
     def update(self, version: str) -> None:

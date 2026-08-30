@@ -116,7 +116,6 @@ class FzFBinaryInstaller(ToolInstaller):
     def extract_tar(self, filepath: Path, extract_path: Path) -> None:
         with tarfile.open(filepath, "r:gz") as tar:
             tar.extractall(extract_path)
-        # print(asset["name"], asset["browser_download_url"])
         bin_path = extract_path / "fzf"
         _ = subprocess.check_call(
             ["mv", bin_path.as_posix(), Path.home() / ".local" / "bin"]

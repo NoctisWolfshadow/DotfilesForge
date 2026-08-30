@@ -5,6 +5,7 @@ from pathlib import Path
 
 import requests
 
+from dotfilesforge import logger
 from dotfilesforge.base_tool import GitBasedTool, ToolInstaller
 from dotfilesforge.config import get_config
 from dotfilesforge.package_manager import get_package_manager
@@ -68,7 +69,7 @@ class NeovimBinaryInstaller(ToolInstaller):
         url = f"https://github.com/neovim/neovim/releases/download/{version}/nvim-linux64.tar.gz"
         tarball_path = Path.home() / f"nvim-{version}.tar.gz"
 
-        print(f"Downloading {url}...")
+        logger.info(f"Downloading '{url}'...")
         response = requests.get(url, stream=True)
         response.raise_for_status()
 
@@ -78,7 +79,7 @@ class NeovimBinaryInstaller(ToolInstaller):
 
         # Extract
         extract_path = Path("/opt/nvim")
-        print(f"Extracting to {extract_path}...")
+        logger.info(f"Extracting to {extract_path}...")
 
         with tarfile.open(tarball_path, "r:gz") as tar:
             tar.extractall(path=extract_path.parent)
@@ -97,7 +98,7 @@ class NeovimBinaryInstaller(ToolInstaller):
         # Cleanup
         tarball_path.unlink()
 
-        print(f"Neovim {version} installed successfully")
+        logger.info(f"Neovim '{version}' installed successfully")
 
     @override
     def update(self, version: str) -> None:

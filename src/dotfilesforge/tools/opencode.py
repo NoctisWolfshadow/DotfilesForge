@@ -5,6 +5,7 @@ import sys
 
 import requests
 
+from dotfilesforge import logger
 from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 
@@ -64,10 +65,10 @@ class OpencodeBinaryInstaller(ToolInstaller):
             shell=True,
         )
 
-        print(f"Opencode {version} installed successfully")
+        logger.info(f"Opencode {version} installed successfully")
 
     @override
     def update(self, version: str) -> None:
         _ = subprocess.check_call(["opencode", "upgrade"])
 
-        print(f"Opencode updated to {version} successfully")
+        logger.info(f"Opencode updated to '{version}' successfully")

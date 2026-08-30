@@ -104,7 +104,6 @@ class PackageManager:
     def install_packages(self, packages: list[str]) -> None:
         # Search packages from Config enabled Installers and add them for Install so this is only called once
         unique_packages = list(set(BASE_PACKAGES + packages))
-        # print(unique_packages)
         _ = subprocess.run(self.getInstall() + unique_packages)
 
 

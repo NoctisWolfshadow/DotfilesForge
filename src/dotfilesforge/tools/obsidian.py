@@ -54,12 +54,10 @@ class ObsidianAppimageInstaller(ToolInstaller):
     def get_current_version(self) -> str | None:
         version: str | None = None
         for folder in self.path.iterdir():
-            print(folder)
             if "Obsidian" in folder.name:
                 temp_version = folder.name.replace("Obsidian-", "").replace(
                     ".AppImage", ""
                 )
-                print(version)
                 if not version or Version(version) < Version(temp_version):
                     version = temp_version
         return version
