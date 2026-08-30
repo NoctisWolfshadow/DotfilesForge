@@ -117,8 +117,8 @@ class Config:
         self.packages: dict[str, list[str]] = cast(
             dict[str, list[str]], toml.get("packages", {})
         )
-        self.dotfiles: dict[str, TomlValue] = cast(
-            dict[str, TomlValue], toml.get("dotfiles", {})
+        self.dotfiles_repo: dict[str, TomlValue] = cast(
+            dict[str, TomlValue], toml.get("dotfiles_repo", {})
         )
         self.shell: dict[str, TomlValue] = cast(
             dict[str, TomlValue], toml.get("shell", {})
@@ -155,7 +155,10 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
     toml = None
     if path and url is None:
         with open(path, "rb") as file:
-            toml = tomllib.load(file)
+            try:
+                toml = tomllib.load(file)
+            except tomllib.TOMLDecodeError as e:
+                logger.error(f"Failed to parse '{path}': {e}")
     if url:
         with tempfile.TemporaryDirectory() as tmp_dir:
             _ = git.Repo.clone_from(url, tmp_dir)
@@ -169,8 +172,11 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
                     )
                 )
 
-            with open(remote_config, "rb") as f:
-                toml = tomllib.load(f)
+            with open(remote_config, "rb") as file:
+                try:
+                    toml = tomllib.load(file)
+                except tomllib.TOMLDecodeError as e:
+                    logger.error(f"Failed to parse '{path}': {e}")
 
     if toml is None:
         raise SystemExit(logger.error("No Config file found. Exiting..."))

@@ -17,26 +17,26 @@ class Dotfiles:
 
     def get_repo_url(self) -> str:
         platform: str | None = cast(
-            str | None, self.config.dotfiles.get("repo_host", None)
+            str | None, self.config.dotfiles_repo.get("repo_host", None)
         )
 
         if platform is None or platform == "" or platform not in PLATFORMS:
             raise SystemExit(logger.error("No valid Platform configured."))
 
         repo_name: str | None = cast(
-            str | None, self.config.dotfiles.get("repo_name", None)
+            str | None, self.config.dotfiles_repo.get("repo_name", None)
         )
         if repo_name is None or repo_name == "":
             raise SystemExit(logger.error("No valid Repo Name configured."))
 
-        host = self.config.dotfiles.get("repo_url", None)
+        host = self.config.dotfiles_repo.get("repo_url", None)
         if platform == "custom" and host is None:
             raise SystemExit(logger.error("No Host for custom configured."))
 
         url = None
         prefix = "https://"
 
-        if self.config.dotfiles.get("repo_modus") == "ssh":
+        if self.config.dotfiles_repo.get("repo_modus") == "ssh":
             prefix = "git@"
 
         if platform == "github":
