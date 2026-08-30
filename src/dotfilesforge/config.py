@@ -71,7 +71,7 @@ class ToolConfig:
     def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
         enabled = data.get("enabled", False)
         global _wsl
-        if data.get("wsl", True) == False and _wsl:
+        if data.get("wsl", True) is False and _wsl:
             enabled = False
 
         if not isinstance(enabled, bool):
@@ -124,7 +124,7 @@ class Config:
             dict[str, TomlValue], toml.get("shell", {})
         )
 
-        if self.packages.get("php", False) == True:
+        if self.packages.get("php", False) is True:
             self.tools["composer"] = ToolConfig(True, "latest")
 
     @override
@@ -176,7 +176,7 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
                 try:
                     toml = tomllib.load(file)
                 except tomllib.TOMLDecodeError as e:
-                    logger.error(f"Failed to parse '{path}': {e}")
+                    logger.error(f"Failed to parse '{remote_config}': {e}")
 
     if toml is None:
         raise SystemExit(logger.error("No Config file found. Exiting..."))
@@ -205,8 +205,8 @@ def check_if_wsl() -> None:
     if _wsl:
         return
 
-    proc_version: str = platform.release()
-    if proc_version.find("wsl"):
+    proc_version: str = platform.release().lower()
+    if "wsl" in proc_version:
         _wsl = True
         return
 
