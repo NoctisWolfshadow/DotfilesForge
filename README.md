@@ -31,14 +31,23 @@ it can be included for everyone else if possible.
 To install this package you can clone this Repository and use uv to run or
 install it as tool.
 
-Run this in the cloned Repository:
+Run this in the cloned Repository to execute the script:
 
 `uv run dotfilesforge [COMMAND]`
+
+Run this in the cloned Repository to install the script as CLI Tool:
+
 `uv tool install .`
 
 ## Config
 
-This is how a config could look.
+Configs can be saved under:
+
+- ~/.dotfiles/dotfilesforge.toml
+- ~/dotfilesforge.toml
+- ~/.config/dotfilesforge/config.toml
+
+This is how a config could look:
 
 ```toml
 [paths]
@@ -63,7 +72,7 @@ name="zsh" # What Shell you want to install
 [packages]
 pacman=['blueprint-compiler', 'ninja', 'gcc']
 
-[dotfiles]
+[dotfiles_repo]
 repo_name="test/test"
 repo_host="custom" # github, gitlab
 #Optional when not wanted https for cloning
