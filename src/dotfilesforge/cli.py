@@ -3,7 +3,7 @@
 
 import click
 
-from dotfilesforge.config import set_wsl
+from dotfilesforge.config import get_config, set_wsl
 from dotfilesforge.dotfiles import Dotfiles
 from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.factory import get_installers, install_dependencies
@@ -24,10 +24,10 @@ def cli(ctx: click.Context, verbose: bool):
     help="For Installs if you want DotfilesForge to install your Repo",
 )
 @click.pass_context
-def install(ctx: click.Context, wsl: bool, remote_config: str | None):
+def install(ctx: click.Context, wsl: bool, remote_config: str | None = None):
     """Install dotfiles and tools"""
     print("Installing dotfiles")
-    set_wsl(wsl)
+    _ = get_config(wsl, remote_config)
     _ = Dotfiles().check_and_install()
     installers = get_installers()
     _ = install_dependencies()
