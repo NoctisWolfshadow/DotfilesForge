@@ -18,9 +18,8 @@ else:
 class ComposerInstaller:
     def __new__(cls) -> ToolInstaller:
         config = get_config()
-        php_enabled = config.packages.get("php", False)
 
-        if php_enabled == True:
+        if config.settings.php_enabled == True:
             return ComposerBinaryInstaller()
         else:
             raise ValueError("Unknown config value in 'packages.php'")

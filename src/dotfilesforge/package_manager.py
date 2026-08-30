@@ -73,9 +73,8 @@ class PackageManager:
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
         packages: list[str] = self.config.packages[self.package_manager]
-        if self.config.packages["php"]:
+        if self.config.settings.php_enabled:
             if package_manager == "apt":
-                # TODO: if apt add ppa for php (ondrej/php)
                 _ = subprocess.run(
                     ["sudo", package_manager, "add-apt-repository", "ppa:ondrej/php"]
                 )

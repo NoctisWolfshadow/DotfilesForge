@@ -7,7 +7,7 @@ import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TypeAlias, cast
+from typing import TypeAlias, TypedDict, cast
 
 import git
 
@@ -68,10 +68,15 @@ class ToolConfig:
         return build_repr(self)
 
     @classmethod
-    def from_raw(cls, data: dict[str, str | bool | None], name: str) -> ToolConfig:
+    def from_raw(
+        cls,
+        data: dict[str, str | bool | None],
+        name: str,
+        wsl_excluded: list[str],
+    ) -> ToolConfig:
         enabled = data.get("enabled", False)
         global _wsl
-        if data.get("wsl", True) is False and _wsl:
+        if name in wsl_excluded and _wsl:
             enabled = False
 
         if not isinstance(enabled, bool):
@@ -103,28 +108,58 @@ class ToolConfig:
         return cls(enabled=enabled, version=version, install_method=install_method)
 
 
+@dataclass
+class SettingsConfig:
+    class RawData(TypedDict, total=False):
+        shell: str | None
+        php: bool
+        wsl_exclude: list[str]
+
+    shell: str | None = None
+    wsl_exclude: list[str] = field(default_factory=list)
+    php_enabled: bool = False
+
+    @override
+    def __repr__(self) -> str:
+        return build_repr(self)
+
+    @classmethod
+    def from_raw(cls, data: RawData) -> SettingsConfig:
+        return cls(
+            shell=data.get("shell"),
+            php_enabled=data.get("php", False),
+            wsl_exclude=data.get("wsl_exclude", []),
+        )
+
+
 class Config:
     def __init__(self, toml: dict[str, TomlValue]):
         self.paths: PathConfig = PathConfig(
             **(cast(dict[str, str], toml.get("paths", {})))
         )
+
+        self.packages: dict[str, list[str]] = cast(
+            dict[str, list[str]], toml.get("packages", {})
+        )
+
+        self.dotfiles_repo: dict[str, TomlValue] = cast(
+            dict[str, TomlValue], toml.get("dotfiles_repo", {})
+        )
+
+        self.settings: SettingsConfig = SettingsConfig.from_raw(
+            cast(SettingsConfig.RawData, toml.get("settings", {}))
+        )
+
         tools_raw = cast(dict[str, dict[str, str | bool | None]], toml.get("tools", {}))
         self.tools: dict[str, ToolConfig] = {
             name: tool
             for name, data in tools_raw.items()
-            if (tool := ToolConfig.from_raw(data, name)).enabled
+            if (
+                tool := ToolConfig.from_raw(data, name, self.settings.wsl_exclude)
+            ).enabled
         }
-        self.packages: dict[str, list[str]] = cast(
-            dict[str, list[str]], toml.get("packages", {})
-        )
-        self.dotfiles_repo: dict[str, TomlValue] = cast(
-            dict[str, TomlValue], toml.get("dotfiles_repo", {})
-        )
-        self.shell: dict[str, TomlValue] = cast(
-            dict[str, TomlValue], toml.get("shell", {})
-        )
 
-        if self.packages.get("php", False) is True:
+        if self.settings.php_enabled is True:
             self.tools["composer"] = ToolConfig(True, "latest")
 
     @override

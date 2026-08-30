@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 from abc import ABC, abstractmethod
-from typing import cast
 
 from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
@@ -16,12 +15,16 @@ else:
     from typing import override
 
 _shell: base_shell | None = None
+_shell_checked = False
 
 
 class Shell:
-    def __new__(cls) -> base_shell:
+    def __new__(cls) -> base_shell | None:
         config = get_config()
-        shell: str = cast(str, config.shell.get("name"))
+        shell: str | None = config.settings.shell
+
+        if not shell:
+            return None
 
         if shell == "zsh":
             return ZSH()
@@ -98,9 +101,10 @@ class FISH(base_shell):
         _ = subprocess.run(["sudo", "apt-add-repository", "ppa:fish-shell/release-4"])
 
 
-def get_shell() -> base_shell:
-    global _shell
-    if _shell is None:
+def get_shell() -> base_shell | None:
+    global _shell, _shell_checked
+    if not _shell_checked:
         _shell = Shell()
+        _shell_checked = True
 
     return _shell

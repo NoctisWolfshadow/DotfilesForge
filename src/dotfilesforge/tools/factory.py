@@ -46,5 +46,8 @@ def install_dependencies():
         packages.extend(installer.get_dependencies())
 
     packages = packages + package_manager.getPackages()
-    packages.append(get_shell().getPackage())
+    shell = get_shell()
+    if shell is not None:
+        packages.append(shell.getPackage())
+
     _ = package_manager.install_packages(packages)
