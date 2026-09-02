@@ -1,6 +1,8 @@
 import os
 import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import cast
 
@@ -80,6 +82,11 @@ class ObsidianAppimageInstaller(ToolInstaller):
 
         self.clear_old_obsidian_install()
         self.download_appimage_file(version)
+        obsidian_appimage: Path | None = self.get_obsidian_appimage_file()
+        if obsidian_appimage is None:
+            return
+        os.chmod(obsidian_appimage, 0o755)
+        self.get_appimage_icon()
 
     @override
     def update(self, version: str) -> None:
@@ -90,21 +97,26 @@ class ObsidianAppimageInstaller(ToolInstaller):
             if folder.is_dir() and "Obsidian" in folder.name:
                 shutil.rmtree(folder)
 
+    def get_obsidian_appimage_file(self) -> Path | None:
+        obsidian_appimage: Path | None = None
+        for file in self.path.glob("Obsidian*.AppImage"):
+            obsidian_appimage = file
+            break
+        return obsidian_appimage
+
     def create_desktop_file(self):
         """Install or Update the Desktop File for new Versions"""
         appimage_dir = self.path
 
-        # Find the Obsidian AppImage
-        obsidian_appimage = None
-        for file in appimage_dir.glob("Obsidian*.AppImage"):
-            obsidian_appimage = file
-            break
+        obsidian_appimage: Path | None = self.get_obsidian_appimage_file()
 
         if not obsidian_appimage:
             logger.error("Warning: No Obsidian AppImage found!")
             return
 
-        desktop_file_path = Path.home() / ".local/share/applications/obsidian.desktop"
+        desktop_file_path: Path = (
+            Path.home() / ".local/share/applications/obsidian.desktop"
+        )
         desktop_file_path.parent.mkdir(parents=True, exist_ok=True)
 
         desktop_content = f"""
@@ -124,7 +136,6 @@ class ObsidianAppimageInstaller(ToolInstaller):
         _ = desktop_file_path.write_text(desktop_content)
         logger.info("Updated or installed Desktop File for Obsidian")
         os.chmod(desktop_file_path, 0o755)
-        os.chmod(obsidian_appimage, 0o755)
 
     def download_appimage_file(self, version: str) -> None:
         url = f"https://api.github.com/repos/obsidianmd/obsidian-releases/releases/tags/v{version}"
@@ -140,3 +151,31 @@ class ObsidianAppimageInstaller(ToolInstaller):
                 file_content = requests.get(asset["browser_download_url"], timeout=30)
                 with open(path, "wb") as file:
                     _ = file.write(file_content.content)
+
+    def get_appimage_icon(self):
+        obsidian_file: Path | None = self.get_obsidian_appimage_file()
+
+        if obsidian_file is None:
+            return
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path: Path = Path(tmp_dir).expanduser()
+            _ = subprocess.run(
+                [obsidian_file, "--appimage-extract"],
+                cwd=path,
+                stdout=subprocess.DEVNULL,
+            )
+
+            path = (
+                path
+                / "squashfs-root"
+                / "usr"
+                / "share"
+                / "icons"
+                / "hicolor"
+                / "512x512"
+                / "apps"
+            )
+            for file in path.glob("*"):
+                icon_path = self.path / "Icons"
+                _ = shutil.copy(file, icon_path)
