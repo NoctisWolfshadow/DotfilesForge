@@ -178,8 +178,9 @@ def get_config(wsl: bool = False, url: str | None = None) -> Config:
 def get_toml_path(base_path: Path | None = None) -> Path | None:
     base_path = base_path or Path.home()
     candidates = [
-        base_path / ".dotfiles" / "dotfilesforge.toml",
         base_path / ".config" / "dotfilesforge" / "config.toml",
+        base_path / ".dotfiles" / "dotfilesforge.toml",
+        base_path / ".dotfiles" / ".config" / "dotfilesforge" / "config.toml",
         base_path / "dotfilesforge.toml",
     ]
     return next((path for path in candidates if path.exists()), None)
