@@ -116,6 +116,7 @@ dependencies = [
     { name = "packaging" },
     { name = "requests" },
     { name = "rich" },
+    { name = "stow-python" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
@@ -126,6 +127,7 @@ requires-dist = [
     { name = "packaging", specifier = ">=26.0" },
     { name = "requests", specifier = ">=2.34.1" },
     { name = "rich", specifier = ">=14.3.3" },
+    { name = "stow-python", git = "https://github.com/isarandi/stow-python.git" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.15.0" },
 ]
 
@@ -237,6 +239,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/1f/ea/49c993d6dfdd7338c
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/d4/59e74daffcb57a07668852eeeb6035af9f32cbfd7a1d2511f17d2fe6a738/smmap-5.0.3-py3-none-any.whl", hash = "sha256:c106e05d5a61449cf6ba9a1e650227ecfb141590d2a98412103ff35d89fc7b2f", size = 24390, upload-time = "2026-03-09T03:43:24.361Z" },
 ]
+
+[[package]]
+name = "stow-python"
+version = "2.4.1.post1"
+source = { git = "https://github.com/isarandi/stow-python.git#1231f41f364d3c51a99015bb6c2a9aecf25eb2d4" }
 
 [[package]]
 name = "typing-extensions"

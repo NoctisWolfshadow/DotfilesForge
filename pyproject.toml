@@ -13,6 +13,7 @@ dependencies = [
     "packaging>=26.0",
     "requests>=2.34.1",
     "rich>=14.3.3",
+    "stow-python",
     "typing-extensions>=4.15.0 ; python_full_version < '3.12'",
 ]
 
@@ -22,3 +23,6 @@ dotfilesforge = "dotfilesforge.cli:cli"
 [build-system]
 requires = ["uv_build>=0.11.0,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.uv.sources]
+stow-python = { git = "https://github.com/isarandi/stow-python.git" }

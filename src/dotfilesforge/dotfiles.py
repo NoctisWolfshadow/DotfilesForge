@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import cast
 
 from git import Repo
+from stow_python import StowConfig, stow
 
 from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
@@ -57,13 +58,21 @@ class Dotfiles:
     def install_path(self) -> Path:
         return Path(self.config.paths.dotfiles)
 
-    def check_and_install(self):
+    def check_and_install(self) -> None:
         path = self.install_path
 
         if path.exists():
             self.update()
+            self.stow_files()
         else:
             self.install()
+            self.stow_files()
+
+    def stow_files(self):
+        target_stow: str = Path.home().as_posix()
+        dir_stow: str = self.install_path.as_posix()
+        config: StowConfig = StowConfig(dir=dir_stow, target=target_stow, dotfiles=True)
+        _ = stow(".", config=config)
 
     def install(self) -> None:
         self._clone()
