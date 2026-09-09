@@ -29,7 +29,8 @@ def install(ctx: click.Context, wsl: bool, remote_config: str | None = None):
     """Install dotfiles and tools"""
     logger.info("Installing dotfiles")
     _ = get_config(wsl, remote_config)
-    _ = Dotfiles().check_and_install()
+    _ = Dotfiles()._repo_is_dirty()
+    exit()
     installers = get_installers()
     _ = install_dependencies()
     for installer in installers:

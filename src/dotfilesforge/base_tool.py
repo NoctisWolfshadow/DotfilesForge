@@ -1,9 +1,9 @@
+import subprocess
 import sys
 from abc import ABC, abstractmethod
 from functools import cached_property
 from pathlib import Path
 
-from git import Repo
 from packaging.version import Version
 
 from dotfilesforge import logger
@@ -90,13 +90,12 @@ class GitBasedTool(ToolInstaller, ABC):
         self.build()
 
     def _clone(self) -> None:
-        _ = Repo.clone_from(to_path=self.install_path, url=self.get_repo_url())
+        _ = subprocess.run(["git", "clone", self.get_repo_url()], cwd=self.install_path)
 
     def _pull_tags(self) -> None:
-        repo = Repo(self.install_path)
-        origin = repo.remotes.origin
-        _ = origin.fetch(tags=True, prune=True, force=True)
+        _ = subprocess.run(
+            ["git", "fetch", "--tags", "--force", "--prune"], cwd=self.install_path
+        )
 
     def _checkout(self, version: str) -> None:
-        repo = Repo(self.install_path)
-        _ = repo.git.execute(["git", "checkout", version])
+        _ = subprocess.run(["git", "checkout", f"{version}"], cwd=self.install_path)

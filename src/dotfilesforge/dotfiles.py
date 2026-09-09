@@ -1,8 +1,8 @@
+import subprocess
 from functools import cached_property
 from pathlib import Path
 from typing import cast
 
-from git import Repo
 from stow_python import StowConfig, stow
 
 from dotfilesforge import logger
@@ -81,17 +81,26 @@ class Dotfiles:
         self._pull()
 
     def _clone(self) -> None:
-        _ = Repo.clone_from(to_path=self.install_path, url=self.get_repo_url())
+        _ = subprocess.run(["git", "clone", self.get_repo_url()], cwd=self.install_path)
 
     def _pull(self) -> None:
-        repo = Repo(self.install_path)
-        has_changes = repo.is_dirty(untracked_files=False)
+        has_changes = self._repo_is_dirty()
 
         if has_changes:
-            _ = repo.git.stash("push", "-m", "Temp Stash for Updates")
+            logger.info("Create Temporary Stash")
+            _ = subprocess.run(
+                ["git", "stash", "-m", "Temp Stash for Updates"], cwd=self.install_path
+            )
 
-        origin = repo.remotes.origin
-        _ = origin.pull()
+        _ = subprocess.run(["git", "pull", "--rebase"], cwd=self.install_path)
 
         if has_changes:
-            _ = repo.git.stash("pop")
+            logger.info("Popping Temporary Stash")
+            _ = subprocess.run(["git", "stash", "pop"])
+
+    def _repo_is_dirty(self):
+        status = subprocess.run(["git", "status"], cwd=self.install_path)
+
+        print(status)
+
+        # return has_staged or has_unstaged

@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import os
 import platform
+import subprocess
 import sys
 import tempfile
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TypeAlias, TypedDict, cast
-
-import git
 
 from dotfilesforge import logger
 from dotfilesforge.representation import build_repr
@@ -197,7 +196,7 @@ def load_toml_config(url: str | None = None) -> dict[str, TomlValue]:
                 logger.error(f"Failed to parse '{path}': {e}")
     if url:
         with tempfile.TemporaryDirectory() as tmp_dir:
-            _ = git.Repo.clone_from(url, tmp_dir)
+            _ = subprocess.run(["git", "clone", url], cwd=tmp_dir)
 
             remote_config: Path | None = get_toml_path(Path(tmp_dir))
 
@@ -251,7 +250,7 @@ def check_if_wsl() -> None:
         _wsl = True
         return
 
-    wsl_vars = {k: v for k, v in os.environ.items() if "wsl" in k.lower()}
+    wsl_vars = {key: value for key, value in os.environ.items() if "wsl" in key.lower()}
     if wsl_vars:
         _wsl = True
         return
