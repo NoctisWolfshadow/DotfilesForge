@@ -96,11 +96,15 @@ class Dotfiles:
 
         if has_changes:
             logger.info("Popping Temporary Stash")
-            _ = subprocess.run(["git", "stash", "pop"])
+            _ = subprocess.run(
+                ["git", "stash", "pop"],
+                cwd=self.install_path,
+                stdout=subprocess.DEVNULL,
+            )
 
     def _repo_is_dirty(self):
-        status = subprocess.run(["git", "status"], cwd=self.install_path)
+        status = subprocess.run(
+            ["git", "diff", "HEAD", "--quiet"], cwd=self.install_path
+        )
 
-        print(status)
-
-        # return has_staged or has_unstaged
+        return status.returncode != 0
