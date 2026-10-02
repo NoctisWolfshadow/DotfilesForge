@@ -205,7 +205,7 @@ class GhosttyGitInstaller(GitBasedTool):
         if use_tip:
             installable_version = "tip"
         else:
-            installable_version = f"v{self.get_latest_version()}"
+            installable_version = f"{self.get_latest_version()}"
 
         return installable_version
 
@@ -220,13 +220,14 @@ class GhosttyGitInstaller(GitBasedTool):
             version = self.installable_ghostty_version(True)
 
         self.get_zig_version(version)
+
         if not current:
             logger.info(f"Installing {self.tool_name}...")
             self.install(version)
             return
 
         if Version(current) < Version(version):
-            logger.info(f"Updating {self.tool_name} from {current} to {version}...")
+            logger.info(f"Updating {self.tool_name} from '{current}' to '{version}'...")
             self.update(version)
         else:
-            logger.info(f"{self.tool_name} is up to date ({current})")
+            logger.info(f"{self.tool_name} is up to date ('{current}')")
