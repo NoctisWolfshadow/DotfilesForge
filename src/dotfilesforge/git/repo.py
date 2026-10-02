@@ -3,6 +3,7 @@ from typing import cast
 
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
+from dulwich.objects import S_ISGITLINK
 from dulwich.repo import Repo as DW_Repo
 from dulwich.stash import Stash as DW_Stash
 
@@ -54,22 +55,40 @@ class Repo:
             force=force,
         )
 
+    def _submodule_paths(self) -> set[bytes]:
+        index = self.repo.open_index()
+        return {
+            path
+            for path, entry in index.iteritems()
+            if S_ISGITLINK(getattr(entry, "mode", 0))
+        }
+
     def is_dirty(self, include_untracked: bool = False) -> bool:
         status = porcelain.status(self.repo)
+        submodules = self._submodule_paths()
 
         staged = cast(dict[str, list[bytes]], status.staged)
         unstaged = cast(list[bytes], status.unstaged)
         untracked = cast(list[str], status.untracked)
 
+        def real(paths: list[str] | list[bytes]) -> list[bytes]:
+            out: list[bytes] = []
+            for path in paths:
+                if isinstance(path, str):
+                    path = path.encode()
+                if path.rstrip(b"/") not in submodules:
+                    out.append(path)
+            return out
+
         # staged is a dict: {"add": [...], "delete": [...], "modify": [...]}
-        if any(staged.values()):
+        if any(real(files) for files in staged.values()):
             return True
 
         # tracked files modified or deleted in the working tree but not staged
-        if unstaged:
+        if real(unstaged):
             return True
 
-        if include_untracked and untracked:
+        if include_untracked and real(untracked):
             return True
 
         return False
