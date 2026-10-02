@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
@@ -41,15 +42,19 @@ class Repo:
     def is_dirty(self, include_untracked: bool = False) -> bool:
         status = porcelain.status(self.repo)
 
+        staged = cast(dict[str, list[bytes]], status.staged)
+        unstaged = cast(list[bytes], status.unstaged)
+        untracked = cast(list[str], status.untracked)
+
         # staged is a dict: {"add": [...], "delete": [...], "modify": [...]}
-        if any(status.staged.values()):
+        if any(staged.values()):
             return True
 
         # tracked files modified or deleted in the working tree but not staged
-        if status.unstaged:
+        if unstaged:
             return True
 
-        if include_untracked and status.untracked:
+        if include_untracked and untracked:
             return True
 
         return False
