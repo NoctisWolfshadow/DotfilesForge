@@ -1,4 +1,3 @@
-import subprocess
 from functools import cached_property
 from pathlib import Path
 from typing import cast
@@ -7,6 +6,7 @@ from stow_python import StowConfig, stow
 
 from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
+from dotfilesforge.git.repo import Repo
 
 PLATFORMS = ["github", "gitlab", "custom"]
 
@@ -15,6 +15,7 @@ PLATFORMS = ["github", "gitlab", "custom"]
 class Dotfiles:
     def __init__(self, config: Config | None = None):
         self.config: Config = config or get_config()
+        self.repo: Repo = Repo(self.install_path)
 
     def get_repo_url(self) -> str:
         platform: str | None = cast(
@@ -40,14 +41,16 @@ class Dotfiles:
         if self.config.dotfiles_repo.get("repo_modus") == "ssh":
             prefix = "git@"
 
+        sep = ":" if prefix == "git@" else "/"
+
         if platform == "github":
-            url = f"{prefix}github.com/{repo_name}"
+            url = f"{prefix}github.com{sep}{repo_name}"
 
         if platform == "gitlab":
-            url = f"{prefix}gitlab.com/{repo_name}"
+            url = f"{prefix}gitlab.com{sep}{repo_name}"
 
         if platform == "custom":
-            url = f"{prefix}{host}/{repo_name}"
+            url = f"{prefix}{host}{sep}{repo_name}"
 
         if url is None:
             raise SystemExit(logger.error("No valid URL created."))
@@ -60,6 +63,10 @@ class Dotfiles:
 
     def check_and_install(self) -> None:
         path = self.install_path
+
+        if not self._has_repo_url() or not self._is_git_repo():
+            logger.warn("Has no Repo configured. Falling back to local Instance.")
+            return
 
         if path.exists():
             self.update()
@@ -74,6 +81,16 @@ class Dotfiles:
         config: StowConfig = StowConfig(dir=dir_stow, target=target_stow, dotfiles=True)
         _ = stow(".", config=config)
 
+    def _has_repo_url(self) -> bool:
+        try:
+            _ = self.get_repo_url()
+            return True
+        except:
+            return False
+
+    def _is_git_repo(self) -> bool:
+        return Repo.is_repo(self.install_path)
+
     def install(self) -> None:
         self._clone()
 
@@ -81,30 +98,17 @@ class Dotfiles:
         self._pull()
 
     def _clone(self) -> None:
-        _ = subprocess.run(["git", "clone", self.get_repo_url()], cwd=self.install_path)
+        self.repo.clone(url=self.get_repo_url(), target=self.install_path)
 
     def _pull(self) -> None:
-        has_changes = self._repo_is_dirty()
+        has_changes = self.repo.is_dirty()
 
         if has_changes:
             logger.info("Create Temporary Stash")
-            _ = subprocess.run(
-                ["git", "stash", "-m", "Temp Stash for Updates"], cwd=self.install_path
-            )
+            self.repo.stash_push(message="Temp Stash for Updates")
 
-        _ = subprocess.run(["git", "pull", "--rebase"], cwd=self.install_path)
+        self.repo.pull()
 
         if has_changes:
             logger.info("Popping Temporary Stash")
-            _ = subprocess.run(
-                ["git", "stash", "pop"],
-                cwd=self.install_path,
-                stdout=subprocess.DEVNULL,
-            )
-
-    def _repo_is_dirty(self):
-        status = subprocess.run(
-            ["git", "diff", "HEAD", "--quiet"], cwd=self.install_path
-        )
-
-        return status.returncode != 0
+            self.repo.stash_pop()
