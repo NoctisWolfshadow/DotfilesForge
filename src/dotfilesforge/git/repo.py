@@ -33,13 +33,13 @@ class Repo:
         branches: list[str] | str | None = None,
     ) -> None:
         porcelain.pull(
-            repo=self._repo,
+            repo=self.repo,
             remote_location=location,
             refspecs=branches,
         )
 
     def is_dirty(self, include_untracked: bool = False) -> bool:
-        status = porcelain.status(self._repo)
+        status = porcelain.status(self.repo)
 
         # staged is a dict: {"add": [...], "delete": [...], "modify": [...]}
         if any(status.staged.values()):
@@ -60,13 +60,13 @@ class Repo:
         branches: list[str] | str | None = None,
     ) -> None:
         _ = porcelain.push(
-            repo=self._repo,
+            repo=self.repo,
             remote_location=location,
             refspecs=branches,
         )
 
     def checkout(self, version: str) -> None:
-        porcelain.checkout(repo=self._repo, target=version)
+        porcelain.checkout(repo=self.repo, target=version)
 
     def clone(self, url: str, target: str | None | Path = None) -> None:
         target = target or self.path
@@ -78,7 +78,7 @@ class Repo:
     def stash_push(
         self, message: str | bytes | None = "Temp Stash for Updates"
     ) -> None:
-        stash: DW_Stash = DW_Stash.from_repo(self._repo)
+        stash: DW_Stash = DW_Stash.from_repo(self.repo)
         msg: bytes | None = None
         if message:
             if isinstance(message, str):
@@ -89,6 +89,6 @@ class Repo:
         _ = stash.push(message=msg)
 
     def stash_pop(self) -> None:
-        stash: DW_Stash = DW_Stash.from_repo(self._repo)
+        stash: DW_Stash = DW_Stash.from_repo(self.repo)
 
         _ = stash.pop(index=0)
