@@ -68,12 +68,18 @@ class Dotfiles:
             logger.warn("Has no Repo configured. Falling back to local Instance.")
             return
 
-        if path.exists():
+        if path.exists() and self.repo.is_dirty():
+            logger.info("Updating dotfiles")
             self.update()
             self.stow_files()
-        else:
+            return
+        elif not path.exists():
+            logger.info("Installing dotfiles")
             self.install()
             self.stow_files()
+            return
+
+        logger.info("Dotfiles are up to date")
 
     def stow_files(self):
         target_stow: str = Path.home().as_posix()
