@@ -1,4 +1,3 @@
-import subprocess
 import sys
 from abc import ABC, abstractmethod
 from functools import cached_property
@@ -8,6 +7,7 @@ from packaging.version import Version
 
 from dotfilesforge import logger
 from dotfilesforge.config import Config, get_config
+from dotfilesforge.git.repo import Repo
 from dotfilesforge.representation import build_repr
 
 if sys.version_info < (3, 12):
@@ -64,6 +64,10 @@ class ToolInstaller(ABC):
 
 
 class GitBasedTool(ToolInstaller, ABC):
+    def __init__(self, config: Config | None = None):
+        super().__init__()
+        self.repo: Repo = Repo(self.install_path)
+
     @abstractmethod
     def get_repo_url(self) -> str: ...
 
@@ -90,12 +94,10 @@ class GitBasedTool(ToolInstaller, ABC):
         self.build()
 
     def _clone(self) -> None:
-        _ = subprocess.run(["git", "clone", self.get_repo_url()], cwd=self.install_path)
+        self.repo.clone(self.get_repo_url(), self.install_path)
 
     def _pull_tags(self) -> None:
-        _ = subprocess.run(
-            ["git", "fetch", "--tags", "--force", "--prune"], cwd=self.install_path
-        )
+        self.repo.fetch(prune=True, include_tags=True, force=True)
 
     def _checkout(self, version: str) -> None:
-        _ = subprocess.run(["git", "checkout", f"{version}"], cwd=self.install_path)
+        self.repo.checkout(version=version)
