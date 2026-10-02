@@ -39,6 +39,21 @@ class Repo:
             refspecs=branches,
         )
 
+    def fetch(
+        self,
+        include_tags: bool = False,
+        prune: bool = False,
+        prune_tags: bool = False,
+        force: bool = False,
+    ) -> None:
+        _ = porcelain.fetch(
+            repo=self.repo,
+            include_tags=include_tags,
+            prune=prune,
+            prune_tags=prune_tags,
+            force=force,
+        )
+
     def is_dirty(self, include_untracked: bool = False) -> bool:
         status = porcelain.status(self.repo)
 
