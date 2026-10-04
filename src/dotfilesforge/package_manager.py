@@ -17,12 +17,12 @@ from dotfilesforge.representation import build_repr
 COMMAND_LIST: dict[str, dict[str, list[str]]] = {
     "pacman": {
         "install": ["sudo", "pacman", "-S", "--noconfirm", "--needed"],
-        "update": ["sudo", "pacman", "-Syu"],
+        "update": ["sudo", "pacman", "-Syu", "--noconfirm"],
         "search": ["pacman", "-Ss"],
     },
     "yay": {
         "install": ["yay", "-S", "--noconfirm", "--needed"],
-        "update": ["yay", "-Syu"],
+        "update": ["yay", "-Syu", "--noconfirm"],
         "search": ["yay", "-Ss"],
     },
     "apt": {
