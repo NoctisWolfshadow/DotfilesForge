@@ -3,7 +3,7 @@
 
 import click
 
-from dotfilesforge.config import get_config, set_wsl
+from dotfilesforge.config import get_config
 from dotfilesforge.dotfiles import Dotfiles
 from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.factory import get_installers, install_dependencies
@@ -39,7 +39,7 @@ def install(ctx: click.Context, wsl: bool, remote_config: str | None = None):
 @click.pass_context
 def update(ctx: click.Context, wsl: bool):
     """Install dotfiles and tools"""
-    set_wsl(wsl)
+    _ = get_config(wsl)
     _ = Dotfiles().check_and_install()
     installers = get_installers()
     _ = get_package_manager().update_packages()
