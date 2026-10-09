@@ -1,6 +1,7 @@
 import textwrap
+from typing import cast
 
-from typing_extensions import cast
+from pydantic import BaseModel
 
 PAD = "  "  # 2 spaces, used everywhere
 
@@ -22,7 +23,10 @@ def format_dict(d: dict[str, object]) -> str:
 
 
 def build_repr(obj: object) -> str:
-    variables = cast(dict[str, object], obj.__dict__)
+    if isinstance(obj, BaseModel):
+        variables = {name: getattr(obj, name) for name in type(obj).model_fields}
+    else:
+        variables = cast(dict[str, object], obj.__dict__)
     fields = [f"{name} = {format_value(value)}" for name, value in variables.items()]
     inner = textwrap.indent(",\n".join(fields), PAD)
     return f"{obj.__class__.__name__}(\n{inner}\n)"
