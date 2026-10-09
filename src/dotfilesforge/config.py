@@ -43,7 +43,6 @@ VALID_INSTALL_METHODS: dict[str, frozenset[str]] = {
 }
 
 _config: Config | None = None
-_wsl: bool = False
 
 
 class PathConfig(BaseModel):
