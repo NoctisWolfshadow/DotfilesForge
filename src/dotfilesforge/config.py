@@ -8,13 +8,14 @@ import tempfile
 import tomllib
 from functools import cache
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, TypedDict
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     ValidationError,
+    ValidationInfo,
     field_validator,
     model_validator,
 )
@@ -78,6 +79,10 @@ class SettingsConfig(BaseModel):
     php_enabled: bool = Field(default=False, alias="php")
 
 
+class WSLContext(TypedDict, total=False):
+    wsl: bool
+
+
 class Config(BaseModel):
     paths: PathConfig = Field(default_factory=PathConfig)
     packages: dict[str, list[str]] = Field(default_factory=dict)
@@ -86,14 +91,16 @@ class Config(BaseModel):
     tools: dict[str, ToolConfig] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def _finalize_tools(self) -> Config:
-        wsl = is_wsl()
+    def _finalize_tools(self, info: ValidationInfo) -> Config:
+        ctx: WSLContext = info.context or {}
+        wsl = bool(ctx.get("wsl"))
+
         for name, tool in self.tools.items():
             allowed = VALID_INSTALL_METHODS.get(name, frozenset({"default"}))
             if tool.install_method not in allowed:
                 raise ValueError(
                     f"tools.{name}.install_method must be one of "
-                    f"{sorted(allowed)}, got {tool.install_method!r}"
+                    + f"{sorted(allowed)}, got {tool.install_method!r}"
                 )
             if wsl and name in self.settings.wsl_exclude:
                 tool.enabled = False
