@@ -13,6 +13,17 @@ class Repo:
         self.path: Path | None = path
         self._repo: DW_Repo | None = None
 
+    def close(self) -> None:
+        if self._repo is not None:
+            self._repo.close()
+            self._repo = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self.close()
+
     @property
     def repo(self) -> DW_Repo:
         if self._repo is None:
@@ -46,6 +57,7 @@ class Repo:
         prune: bool = False,
         prune_tags: bool = False,
         force: bool = False,
+        remote_location: bytes | str = "origin",
     ) -> None:
         _ = porcelain.fetch(
             repo=self.repo,
@@ -53,6 +65,7 @@ class Repo:
             prune=prune,
             prune_tags=prune_tags,
             force=force,
+            remote_location=remote_location,
         )
 
     def _submodule_paths(self) -> set[bytes]:
