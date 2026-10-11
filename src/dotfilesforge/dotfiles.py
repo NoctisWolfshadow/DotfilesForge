@@ -1,5 +1,6 @@
 from functools import cached_property
 from pathlib import Path
+from types import TracebackType
 from typing import cast
 
 from stow_python import StowConfig, stow
@@ -16,6 +17,20 @@ class Dotfiles:
     def __init__(self, config: Config | None = None):
         self.config: Config = config or get_config()
         self.repo: Repo = Repo(self.install_path)
+
+    def close(self) -> None:
+        self.repo.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
+        self.close()
 
     def get_repo_url(self) -> str:
         platform: str | None = cast(

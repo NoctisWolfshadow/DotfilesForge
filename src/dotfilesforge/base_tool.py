@@ -68,6 +68,15 @@ class GitBasedTool(ToolInstaller, ABC):
         super().__init__()
         self.repo: Repo = Repo(self.install_path)
 
+    def close(self) -> None:
+        self.repo.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self.close()
+
     @abstractmethod
     def get_repo_url(self) -> str: ...
 
@@ -83,14 +92,20 @@ class GitBasedTool(ToolInstaller, ABC):
         path = self.install_path
         if path.exists():
             return
-        self._clone()
-        self._checkout(version)
+        try:
+            self._clone()
+            self._checkout(version)
+        finally:
+            self.repo.close()
         self.build()
 
     @override
     def update(self, version: str) -> None:
-        self._pull_tags()
-        self._checkout(version)
+        try:
+            self._pull_tags()
+            self._checkout(version)
+        finally:
+            self.repo.close()
         self.build()
 
     def _clone(self) -> None:
