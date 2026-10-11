@@ -121,10 +121,8 @@ class Repo:
         porcelain.checkout(repo=self.repo, target=version)
 
     def clone(self, url: str, target: str | None | Path = None) -> None:
-        self.close()
         target = target or self.path
         self._repo: DW_Repo = porcelain.clone(source=url, target=target)
-        self.close()
 
     def diff(self):
         pass
