@@ -77,6 +77,7 @@ class Repo:
         }
 
     def is_dirty(self, include_untracked: bool = False) -> bool:
+        self.fetch()
         status = porcelain.status(self.repo)
         submodules = self._submodule_paths()
 
