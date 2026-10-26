@@ -83,7 +83,7 @@ class Dotfiles:
             logger.warn("Has no Repo configured. Falling back to local Instance.")
             return
 
-        if path.exists() and self.repo.is_dirty():
+        if path.exists() and self.repo.repo_has_changes_upstream():
             logger.info("Updating dotfiles")
             self.update()
             self.stow_files()

@@ -4,6 +4,7 @@ from typing import cast
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
 from dulwich.objects import S_ISGITLINK
+from dulwich.refs import Ref
 from dulwich.repo import Repo as DW_Repo
 from dulwich.stash import Stash as DW_Stash
 
@@ -77,7 +78,6 @@ class Repo:
         }
 
     def is_dirty(self, include_untracked: bool = False) -> bool:
-        self.fetch()
         status = porcelain.status(self.repo)
         submodules = self._submodule_paths()
 
@@ -107,6 +107,43 @@ class Repo:
 
         return False
 
+    def repo_has_changes_upstream(self) -> bool:
+        self.fetch()
+        repo = self.repo
+
+        try:
+            branch = porcelain.active_branch(
+                repo
+            )  # bytes; raises ValueError if HEAD is detached
+        except ValueError:
+            return False
+
+        config = repo.get_config()
+        try:
+            remote_name = config.get((b"branch", branch), b"remote")
+            merge = config.get((b"branch", branch), b"merge")
+        except KeyError:  # no upstream configured
+            return False
+
+        remote_ref = (
+            b"refs/remotes/" + remote_name + b"/" + merge.removeprefix(b"refs/heads/")
+        )
+
+        try:
+            remote_sha = repo.refs[Ref(remote_ref)]
+        except KeyError:  # remote doesn't have this branch
+            return False
+
+        local_sha = repo.head()
+        if local_sha == remote_sha:
+            return False
+
+        # Commits reachable from the remote tip but not from local
+        return (
+            next(iter(repo.get_walker(include=[remote_sha], exclude=[local_sha])), None)
+            is not None
+        )
+
     def push(
         self,
         location: str | None = None,
@@ -123,7 +160,7 @@ class Repo:
 
     def clone(self, url: str, target: str | None | Path = None) -> None:
         target = target or self.path
-        self._repo: DW_Repo = porcelain.clone(source=url, target=target)
+        self._repo = porcelain.clone(source=url, target=target)
 
     def diff(self):
         pass
