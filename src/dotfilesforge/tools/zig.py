@@ -1,3 +1,4 @@
+import platform
 import shutil
 import subprocess
 import sys
@@ -50,7 +51,7 @@ class ZigBinaryInstaller(ToolInstaller):
         path = self.install_path / "zig"
         if not shutil.which(path):
             return None
-        result = subprocess.check_output([path, "--version"], text=True)
+        result = subprocess.check_output([path, "version"], text=True)
         return result.splitlines()[0].split()[-1]
 
     @override
@@ -72,8 +73,16 @@ class ZigBinaryInstaller(ToolInstaller):
         import tarfile
 
         # Download binary
-        url = f"https://codeberg.org/ziglang/zig/archive/{version}.tar.gz"
-        tarball_path = Path(self.config.paths.git_repos) / f"zig-{version}.tar.gz"
+        arch = self.get_arch()
+        base_url = f"https://ziglang.org/download/{version}/"
+
+        if Version(version) >= Version("0.14.1"):
+            filename = f"zig-{arch}-linux-{version}.tar.xz"
+        else:
+            filename = f"zig-linux-{arch}-{version}.tar.xz"
+
+        url = base_url + filename
+        tarball_path = Path(self.config.paths.git_repos) / filename
 
         logger.info(f"Downloading '{url}'...")
         response = requests.get(url, stream=True)
@@ -88,7 +97,7 @@ class ZigBinaryInstaller(ToolInstaller):
         extract_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Extracting to '{extract_path}'...")
 
-        with tarfile.open(tarball_path, "r:gz") as tar:
+        with tarfile.open(tarball_path, "r:*") as tar:
             for member in tar.getmembers():
                 parts = Path(member.name).parts
                 if len(parts) <= 1:
@@ -135,3 +144,11 @@ class ZigBinaryInstaller(ToolInstaller):
             self.update(version)
         else:
             logger.info(f"{self.tool_name} is up to date ({current})")
+
+    def get_arch(self) -> str:
+        arch = platform.machine().lower()
+        if not arch:
+            raise SystemError(
+                logger.error("Could not detect the arch type of the machine")
+            )
+        return arch

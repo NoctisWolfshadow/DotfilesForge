@@ -73,6 +73,7 @@ class GhosttyGitInstaller(GitBasedTool):
         ("1.2", "0.13.0"),
         ("1.3", "0.14.1"),
         ("1.4", "0.15.2"),
+        ("1.5", "0.17.0"),
     ]
 
     @property
@@ -142,12 +143,21 @@ class GhosttyGitInstaller(GitBasedTool):
         zig = ZigInstaller()
         zig.check_and_install(True, self.zig_version)
         path = self.install_path
-        _ = subprocess.check_call(["make", "CMAKE_BUILD_TYPE=RelWithDebInfo"], cwd=path)
-        _ = subprocess.check_call(["sudo", "make", "install"], cwd=path)
+        _ = subprocess.check_call(
+            [
+                "sudo",
+                zig.install_path / "zig",
+                "build",
+                "-p",
+                "/usr",
+                "-Doptimize=ReleaseFast",
+            ],
+            cwd=path,
+        )
 
     def get_zig_version(self, ghostty_version: str) -> None:
         if ghostty_version.lower() == "tip":
-            self.zig_version: str = "0.15.2"
+            self.zig_version: str = "0.17.0"
             return
 
         ghostty_version_local: Version = Version(ghostty_version)
@@ -202,6 +212,10 @@ class GhosttyGitInstaller(GitBasedTool):
             version["gtk"]
         ) < Version("4.14"):
             installable_version = "v1.1.3"
+        if Version(version["libadwaita"]) < Version("1.7") and Version(
+            version["gtk"]
+        ) < Version("4.18"):
+            installable_version = "v1.3.1"
         if use_tip:
             installable_version = "tip"
         else:
