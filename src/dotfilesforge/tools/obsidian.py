@@ -87,6 +87,7 @@ class ObsidianAppimageInstaller(ToolInstaller):
             return
         os.chmod(obsidian_appimage, 0o755)
         self.get_appimage_icon()
+        self.create_desktop_file()
 
     @override
     def update(self, version: str) -> None:
@@ -94,8 +95,12 @@ class ObsidianAppimageInstaller(ToolInstaller):
 
     def clear_old_obsidian_install(self) -> None:
         for folder in self.path.iterdir():
-            if folder.is_dir() and "Obsidian" in folder.name:
+            if "Obsidian" not in folder.name:
+                continue
+            if folder.is_dir():
                 shutil.rmtree(folder)
+            else:
+                folder.unlink()
 
     def get_obsidian_appimage_file(self) -> Path | None:
         obsidian_appimage: Path | None = None
@@ -138,7 +143,7 @@ class ObsidianAppimageInstaller(ToolInstaller):
         os.chmod(desktop_file_path, 0o755)
 
     def download_appimage_file(self, version: str) -> None:
-        url = f"https://api.github.com/repos/obsidianmd/obsidian-releases/releases/tags/v{version}"
+        url = f"https://api.github.com/repos/obsidianmd/obsidian-releases/releases/tags/{version}"
         response = requests.get(url, timeout=10)
         data = cast(dict[str, list[dict[str, str]]], response.json())
         file_content = None
