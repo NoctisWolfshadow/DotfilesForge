@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import cast
 
@@ -46,11 +47,13 @@ class Repo:
         location: str | None = None,
         branches: list[str] | str | None = None,
     ) -> None:
-        porcelain.pull(
-            repo=self.repo,
-            remote_location=location,
-            refspecs=branches,
-        )
+        with open(os.devnull, "wb") as devnull:
+            porcelain.pull(
+                repo=self.repo,
+                remote_location=location,
+                refspecs=branches,
+                outstream=devnull,
+            )
 
     def fetch(
         self,
