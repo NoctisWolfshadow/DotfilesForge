@@ -53,6 +53,7 @@ class Repo:
                 remote_location=location,
                 refspecs=branches,
                 outstream=devnull,
+                errstream=devnull,
             )
 
     def fetch(
