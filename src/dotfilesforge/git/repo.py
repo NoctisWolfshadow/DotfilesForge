@@ -64,14 +64,17 @@ class Repo:
         force: bool = False,
         remote_location: bytes | str = "origin",
     ) -> None:
-        _ = porcelain.fetch(
-            repo=self.repo,
-            include_tags=include_tags,
-            prune=prune,
-            prune_tags=prune_tags,
-            force=force,
-            remote_location=remote_location,
-        )
+        with open(os.devnull, "w") as out, open(os.devnull, "wb") as err:
+            _ = porcelain.fetch(
+                repo=self.repo,
+                include_tags=include_tags,
+                prune=prune,
+                prune_tags=prune_tags,
+                force=force,
+                remote_location=remote_location,
+                outstream=out,
+                errstream=err,
+            )
 
     def _submodule_paths(self) -> set[bytes]:
         index = self.repo.open_index()
