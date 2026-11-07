@@ -1,3 +1,4 @@
+import re
 import shutil
 import subprocess
 import sys
@@ -118,7 +119,6 @@ class GhosttyGitInstaller(GitBasedTool):
                 "ls-remote",
                 "--tags",
                 "--refs",
-                "--sort=v:refname",
                 self.get_repo_url(),
             ],
             text=True,
@@ -127,15 +127,17 @@ class GhosttyGitInstaller(GitBasedTool):
         if not tags:
             raise RuntimeError("No version tags found")
 
-        latest = None
-        for tag in tags.strip().split("\n"):
-            if "refs/tags/v" in tag:
-                latest = tag.split("/")[-1]
+        releases = []
+        for line in tags.splitlines():
+            _, _, ref = line.partition("\t")
+            tag = ref.removeprefix("refs/tags/")
+            if re.compile(r"v\d+\.\d+\.\d+").fullmatch(tag):
+                releases.append(tag)
 
-        if not latest:
+        if not releases:
             raise RuntimeError("No version tag found")
 
-        return latest
+        return max(releases, key=Version)
 
     @override
     def build(self) -> None:

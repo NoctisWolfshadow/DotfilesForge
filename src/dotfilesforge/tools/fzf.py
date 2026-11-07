@@ -100,7 +100,7 @@ class FzFBinaryInstaller(ToolInstaller):
         _ = self.extract_tar(filepath, download_path)
 
     def download_tar_file(self, version: str, path: Path) -> Path:
-        url = f"https://api.github.com/repos/junegunn/fzf/releases/tags/v{version}"
+        url = f"https://api.github.com/repos/junegunn/fzf/releases/tags/{version}"
         response = requests.get(url, timeout=10)
         data = cast(dict[str, list[dict[str, str]]], response.json())
         file_content = None
