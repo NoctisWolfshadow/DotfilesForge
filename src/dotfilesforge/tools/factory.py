@@ -4,6 +4,7 @@ from dotfilesforge.base_tool import ToolInstaller
 from dotfilesforge.config import get_config
 from dotfilesforge.package_manager import get_package_manager
 from dotfilesforge.tools.composer import ComposerInstaller
+from dotfilesforge.tools.esp_idf import EspIdfInstaller
 from dotfilesforge.tools.fzf import FzFInstaller
 from dotfilesforge.tools.ghostty import GhosttyInstaller
 from dotfilesforge.tools.laravel import LaravelInstaller
@@ -24,6 +25,7 @@ INSTALLER_MAP: dict[str, Callable[[], ToolInstaller]] = {
     "fzf": FzFInstaller,
     "laravel": LaravelInstaller,
     "obsidian": ObsidianInstaller,
+    "esp_idf": EspIdfInstaller,
 }
 
 
