@@ -65,10 +65,9 @@ class PackageManager:
         return build_repr(self)
 
     def update_packages(self) -> None:
-        cmd = self.commands["update"]
+        _ = subprocess.run(self.commands["update"])
         if self.package_manager == "apt":
-            cmd += self.commands["upgrade"]
-        _ = subprocess.run(cmd)
+            _ = subprocess.run(self.commands["upgrade"])
 
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
