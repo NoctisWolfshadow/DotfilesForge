@@ -71,13 +71,16 @@ class PackageManager:
 
     def getPackages(self) -> list[str]:
         package_manager = self.package_manager
-        packages: list[str] = self.config.packages[self.package_manager]
+        packages: list[str] = self.config.packages.get(self.package_manager, [])
         if self.config.settings.php_enabled:
             if package_manager == "apt":
                 _ = subprocess.run(
                     ["sudo", package_manager, "add-apt-repository", "ppa:ondrej/php"]
                 )
-            packages = packages + PHP_PACKAGES[package_manager]
+            if package_manager in ("yay", "pacman"):
+                packages = packages + PHP_PACKAGES["pacman"]
+            else:
+                packages = packages + PHP_PACKAGES[package_manager]
         if package_manager == "yay":
             packages = self.config.packages["pacman"] + packages
         return packages
