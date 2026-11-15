@@ -11,6 +11,7 @@ from dotfilesforge.tools.laravel import LaravelInstaller
 from dotfilesforge.tools.neovim import NeovimInstaller
 from dotfilesforge.tools.obsidian import ObsidianInstaller
 from dotfilesforge.tools.opencode import OpencodeInstaller
+from dotfilesforge.tools.rustup import RustupInstaller
 from dotfilesforge.tools.shell import get_shell
 from dotfilesforge.tools.yazi import YaziInstaller
 
@@ -26,6 +27,7 @@ INSTALLER_MAP: dict[str, Callable[[], ToolInstaller]] = {
     "laravel": LaravelInstaller,
     "obsidian": ObsidianInstaller,
     "esp_idf": EspIdfInstaller,
+    "rustup": RustupInstaller,
 }
 
 
