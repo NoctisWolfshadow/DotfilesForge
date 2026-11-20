@@ -65,6 +65,7 @@ class ToolConfig(BaseModel):
 
     enabled: bool = False
     version: str | None = "latest"
+    plugins: list[str] | None = None
     install_method: str = "default"
 
 

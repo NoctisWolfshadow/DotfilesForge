@@ -134,6 +134,9 @@ class YaziGitInstaller(GitBasedTool):
             ],
             cwd=self.install_path,
         )
+        plugins = self.config.tools[self.tool_name].plugins
+        if plugins:
+            _ = subprocess.check_call(["ya", "pkg", "add", *plugins])
 
     @override
     def get_latest_version(self) -> str:
